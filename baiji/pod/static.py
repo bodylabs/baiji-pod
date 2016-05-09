@@ -131,7 +131,7 @@ class StaticCache(object):
     def _raise_cannot_get_needed_file(self, cache_file, reason):
         from baiji.config import credentials
         from baiji.exceptions import AWSCredentialsMissing
-        from bodylabs.serialization import yaml
+        from baiji.pod.util import yaml
         from bodylabs.util.internet import InternetUnreachableError
         from bodylabs.util.paths import core_path
 

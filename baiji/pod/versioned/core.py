@@ -76,7 +76,7 @@ class VersionedCache(object):
 
     @cached_property
     def manifest(self):
-        from bodylabs.serialization import json
+        from baiji.pod.util import json
         return json.load(self.manifest_path)
 
     @property
@@ -92,7 +92,7 @@ class VersionedCache(object):
         return path in self.manifest
 
     def update_manifest(self, path, version):
-        from bodylabs.serialization import json
+        from baiji.pod.util import json
         path = self.normalize_path(path)
         manifest = json.load(self.manifest_path)
         manifest[path] = version
