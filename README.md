@@ -9,8 +9,9 @@ Static caching of files from Amazon S3, using [baiji][].
 Features
 --------
 
-- Static cache supports loading by paths
-- Versioned cache supports loading by version numbers pinned in a manifest
+- Static cache supports loading any S3 path
+- Versioned cache supports loading S3 paths from a specific bucket, using
+  version numbers pinned in a manifest
 - Both caches support pre-filling from a manifest file
 - Supports Python 2.7 and uses boto2
 - Supports OS X, Linux, and Windows
@@ -48,8 +49,8 @@ rake lint
 Contribute
 ----------
 
-- Issue Tracker: github.com/bodylabs/baiji-pod/issues
-- Source Code: github.com/bodylabs/baiji-pod
+- Issue Tracker: https://github.com/bodylabs/baiji-pod/issues
+- Source Code: https://github.com/bodylabs/baiji-pod
 
 Pull requests welcome!
 
