@@ -13,7 +13,7 @@ Features
 - Versioned cache supports loading S3 paths from a specific bucket, using
   version numbers pinned in a manifest
 - Both caches support pre-filling from a manifest file
-- Supports Python 2.7 and uses boto2
+- Supports Python 2.7
 - Supports OS X, Linux, and Windows
 - Tested and production-hardened
 
