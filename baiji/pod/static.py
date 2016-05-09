@@ -27,16 +27,16 @@ class CachedPath(str):
 
 
 class CacheFile(object):
-    def __init__(self, path, config, bucket=None):
-        self.config = config
+    def __init__(self, static_cache, path, bucket=None):
+        self.config = static_cache.config
 
         if s3.path.isremote(path):
             parsed_path = s3.path.parse(path)
             self.path = parsed_path.path
             self.bucket = parsed_path.netloc
         else:
-            if sc.is_cachefile(path):
-                self.path = sc.un_sc(path)
+            if static_cache.is_cachefile(path):
+                self.path = static_cache.un_sc(path)
                 self.bucket = path.replace(self.config.cache_dir, '').split(os.sep)[0]
             else:
                 self.path = path
@@ -176,7 +176,7 @@ class StaticCache(object):
                 where = stack_frame_info(stacklevel + 2).pretty
                 print message + ' - ' + where
 
-        cache_file = CacheFile(path=path, config=self.config, bucket=bucket)
+        cache_file = CacheFile(static_cache=self, path=path, bucket=bucket)
 
         if not cache_file.is_cached:
             try:
@@ -200,14 +200,14 @@ class StaticCache(object):
         return cache_file.local
 
     def invalidate(self, path, bucket=None):
-        CacheFile(path=path, config=self.config, bucket=bucket).invalidate()
+        CacheFile(static_cache=self, path=path, bucket=bucket).invalidate()
 
     def invalidate_all(self):
         import shutil
         shutil.rmtree(os.path.join(self.config.cache_dir, '.timestamps'), ignore_errors=True)
 
     def delete(self, path, bucket=None):
-        CacheFile(path=path, config=self.config, bucket=bucket).remove_cached()
+        CacheFile(static_cache=self, path=path, bucket=bucket).remove_cached()
 
     def is_cachefile(self, path):
         return isinstance(path, CachedPath) or os.path.expanduser(path).startswith(self.config.cache_dir)
@@ -231,10 +231,10 @@ class StaticCache(object):
                     cachefile.remove_cached()
 
     def disallow_gc(self, path):
-        SCExemptList().add(CacheFile(path=path, config=self.config).remote)
+        SCExemptList().add(CacheFile(static_cache=self, path=path).remote)
 
     def allow_gc(self, path):
-        SCExemptList().remove(CacheFile(path=path, cofing=self.config).remote)
+        SCExemptList().remove(CacheFile(static_cache=self, path=path).remote)
 
     def ls(self):
         files_in_cache = []
@@ -245,8 +245,8 @@ class StaticCache(object):
                     for name in files:
                         if name not in ['.DS_Store']:
                             cache_file = CacheFile(
+                                static_cache=self,
                                 path=os.path.join(root, name),
-                                config=self.config,
                                 bucket=bucket)
                             files_in_cache.append(cache_file)
         return files_in_cache

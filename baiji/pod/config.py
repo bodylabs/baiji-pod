@@ -37,14 +37,14 @@ class Config(object):
     @property
     def timeout(self):
         try:
-            return int(os.getenv('STATIC_CACHE_TIMEOUT', self.DEFAULT_TIMEOUT))
+            return int(os.getenv('STATIC_CACHE_TIMEOUT', self.TIMEOUT))
         except ValueError:
             return None
 
     @property
     def gc_timeout(self):
         try:
-            return int(os.getenv('STATIC_CACHE_GARBAGE_COLLECTION_TIMEOUT', self.DEFAULT_GARBAGE_COLLECTION_TIMEOUT))
+            return int(os.getenv('STATIC_CACHE_GARBAGE_COLLECTION_TIMEOUT', self.GARBAGE_COLLECTION_TIMEOUT))
         except ValueError:
             return None
 
