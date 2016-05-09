@@ -190,11 +190,11 @@ class VersionedCache(object):
         import semantic_version
         if isinstance(version, basestring):
             version = semantic_version.Version(version, partial=True)
-        if version.major == None:
+        if version.major is None:
             version.major = 0
-        if version.minor == None:
+        if version.minor is None:
             version.minor = 0
-        if version.patch == None:
+        if version.patch is None:
             version.patch = 0
         version.prerelease = []
         version.build = []
@@ -278,7 +278,7 @@ class VersionedCache(object):
         if not self.version_number_is_valid(version):
             raise ValueError("invalid version %s, always use versions of the form N.N.N" % version)
         latest_version = self.latest_available_version(path)
-        if not semantic_version.Version(version) > semantic_version.Version(latest_version):
+        if semantic_version.Version(version) <= semantic_version.Version(latest_version):
             raise ValueError("version numbers must be strictly increasing. You specified %s but there is already a %s", version, latest_version)
         s3.cp(local_file, self.uri(path, version), progress=verbose)
         self.update_manifest(path, version)
