@@ -1,18 +1,20 @@
-def pack(self, manifest, save_to, max_size=None):
+def dump(static_cache, versioned_cache, paths, save_to, max_size=None):
+    import os
     import zipfile
-    from bodylabs.cache.versioned import VersionedCache
-    from bodylabs.serialization import multiformat
-    vc = VersionedCache(cache=self)
+
+    sc = static_cache
+    vc = versioned_cache
 
     class FileToPack(object):
         def __init__(self, src):
+            from baiji import s3
             self.uri = src
             parsed_src = s3.path.parse(src)
-            if parsed_src[1] in sc_conf.immutable_buckets and vc.is_versioned(parsed_src[2]):
+            if parsed_src[1] in sc.config.immutable_buckets and vc.is_versioned(parsed_src[2]):
                 self.src = vc(parsed_src[2])
             else:
                 self.src = sc(src)
-            self.dst = self.src.replace(sc_conf.cache_dir, '')
+            self.dst = self.src.replace(sc.config.cache_dir, '')
             if self.dst.startswith('/'):
                 self.dst = self.dst[1:]
         def __repr__(self):
@@ -25,7 +27,11 @@ def pack(self, manifest, save_to, max_size=None):
                 self._size = os.stat(self.src).st_size # FIXME pylint: disable=attribute-defined-outside-init
                 return self._size
 
-    files_to_pack = sorted([FileToPack(f) for f in multiformat.load(manifest)], key=lambda x: x.size, reverse=True)
+    files_to_pack = sorted(
+        [FileToPack(f) for f in paths],
+        key=lambda x: x.size,
+        reverse=True)
+
     if max_size is not None:
         mb = 1024 * 1024
         max_size = max_size * mb
@@ -46,6 +52,7 @@ def pack(self, manifest, save_to, max_size=None):
                 zip_files[ii].append(f)
     else:
         zip_files = [files_to_pack]
+
     for ii, files_in_zip in enumerate(zip_files):
         if max_size is not None:
             zip_path = os.path.splitext(save_to)[0] + '_%d.zip' % (ii+1)
@@ -57,8 +64,8 @@ def pack(self, manifest, save_to, max_size=None):
                 print "  Adding", f.dst
                 zf.write(f.src, f.dst)
 
-def unpack(self, files):
+def load(static_cache, pack_files):
     import zipfile
-    for f in files:
+    for f in pack_files:
         with zipfile.ZipFile(f, 'r') as zf:
-            zf.extractall(sc_conf.cache_dir)
+            zf.extractall(static_cache.config.cache_dir)

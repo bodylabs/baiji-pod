@@ -164,5 +164,5 @@ class VCRunner(object):
                         vc.manifest_version(f),
                         url)
 
-        # On success, exit with status code of 1.
-        return 1
+        # On success, exit with status code of 0.
+        return 0

@@ -15,8 +15,6 @@ class SCRunner(object):
         subparsers['del'] = parser.subs.add_parser('del', help='remove a file from the cache')
         subparsers['ls'] = parser.subs.add_parser('ls', help='list everything in the cache')
         subparsers['loc'] = parser.subs.add_parser('loc', help='print the location of the cache')
-        subparsers['pack'] = parser.subs.add_parser('pack', help='print the location of the cache')
-        subparsers['unpack'] = parser.subs.add_parser('unpack', help='print the location of the cache')
 
         subparsers['cache'].add_argument('key', type=str, help='key to cache: s3://BUCKET/PATH/TO/FILE')
         subparsers['cache'].add_argument('-u', '--update', action='store_true', help="always check for updates")
@@ -24,12 +22,6 @@ class SCRunner(object):
         subparsers['del'].add_argument('key', type=str, help='key to delete: s3://BUCKET/PATH/TO/FILE')
 
         subparsers['ls'].add_argument('-l', '--details', action='store_true', help='more detail')
-
-        subparsers['pack'].add_argument('manifest', type=str, default=None, help='File listing sc paths to package')
-        subparsers['pack'].add_argument('save_to', type=str, default=None, help='Location to save the package')
-        subparsers['pack'].add_argument('--max_size', type=int, default=None, help='max size of the packaged zip files, in MB')
-
-        subparsers['unpack'].add_argument('files', type=str, nargs='+', help='zip files to unpack into the sc cache')
 
         return parser.parse_args()
 
@@ -59,11 +51,5 @@ class SCRunner(object):
         elif args.command == 'loc':
             print self.sc.config.cache_dir
 
-        elif args.command == 'pack':
-            self.sc.pack(args.manifest, args.save_to, max_size=args.max_size)
-
-        elif args.command == 'unpack':
-            self.sc.unpack(args.files)
-
-        # On success, exit with status code of 1.
-        return 1
+        # On success, exit with status code of 0.
+        return 0

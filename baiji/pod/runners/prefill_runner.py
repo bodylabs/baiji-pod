@@ -60,5 +60,5 @@ class PrefillRunner(object):
                 paths=paths,
                 verbose=args.verbose)
 
-        # On success, exit with status code of 1.
-        return 1
+        # On success, exit with status code of 0.
+        return 0
