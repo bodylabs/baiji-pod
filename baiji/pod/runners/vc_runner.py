@@ -4,16 +4,19 @@ class VCRunner(object):
         self.default_manifest_path = default_manifest_path
         self.default_bucket = default_bucket
 
-    def _create_vc(self, manifest_path=None):
+    def _create_vc(self, manifest_path=None, bucket=None):
         from baiji.pod import VersionedCache
 
         if manifest_path is None:
             manifest_path = self.default_manifest_path
 
+        if bucket is None:
+            bucket = self.default_bucket
+
         return VersionedCache(
             static_cache=self.sc,
             manifest_path=manifest_path,
-            bucket=self.default_bucket)
+            bucket=bucket)
 
     def _parse_args(self):
         import argparse
@@ -87,7 +90,7 @@ class VCRunner(object):
 
         args = self._parse_args()
 
-        vc = self._create_vc(manifest_path=args.manifest)
+        vc = self._create_vc(manifest_path=args.manifest, bucket=args.bucket)
 
         if args.command == 'add':
             vc.add(args.path, args.file, verbose=True)

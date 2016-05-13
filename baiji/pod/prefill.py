@@ -2,12 +2,11 @@ from baiji.util.parallel import ParallelWorker
 
 
 class PrefillWorker(ParallelWorker):
-    def __init__(self, cache_obj, verbose=False):
-        from baiji.pod.versioned import VersionedCache
-        self.sc = cache_obj
-        self.vc = VersionedCache(cache=self.sc)
-        self.verbose = verbose
+    def __init__(self, static_cache, versioned_cache, verbose=False):
         super(PrefillWorker, self).__init__()
+        self.sc = static_cache
+        self.vc = versioned_cache
+        self.verbose = verbose
 
     def on_run(self, remote):
         import sys
@@ -25,17 +24,16 @@ class PrefillWorker(ParallelWorker):
             print '{} is in the prefill manifest, but is not found!'.format(remote)
 
 
-def prefill(self, prefill_file=None, verbose=False):
-    '''
-    By default, prefill uses the list of assets checked in to core at
-    bodylabs/cache/sc_gc.conf.yaml. To prefill with an alternate list
-    of files, use `prefill_file`.
-    '''
+def prefill(static_cache, versioned_cache, paths, verbose=False):
     from baiji.util.parallel import parallel_for
     from bodylabs.util.timer import Timer
 
     with Timer(verbose=False) as t:
-        parallel_for(prefill_file, PrefillWorker, args=[self, verbose], num_processes=12)
+        parallel_for(
+            paths,
+            PrefillWorker,
+            args=[static_cache, versioned_cache, verbose],
+            num_processes=12)
 
     print ''
     print 'sc prefill done in {} seconds'.format(t.elapsed_time_s)

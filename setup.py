@@ -33,6 +33,7 @@ setup(
         'baiji/pod/versioned',
     ],
     scripts=[
+        'bin/pod-prefill',
         'bin/sc',
         'bin/vc',
     ],

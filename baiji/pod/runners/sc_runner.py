@@ -13,7 +13,6 @@ class SCRunner(object):
 
         subparsers['cache'] = parser.subs.add_parser('cache', help='cache a file')
         subparsers['del'] = parser.subs.add_parser('del', help='remove a file from the cache')
-        subparsers['prefill'] = parser.subs.add_parser('prefill', help='pre-download the usual files')
         subparsers['ls'] = parser.subs.add_parser('ls', help='list everything in the cache')
         subparsers['loc'] = parser.subs.add_parser('loc', help='print the location of the cache')
         subparsers['pack'] = parser.subs.add_parser('pack', help='print the location of the cache')
@@ -23,9 +22,6 @@ class SCRunner(object):
         subparsers['cache'].add_argument('-u', '--update', action='store_true', help="always check for updates")
 
         subparsers['del'].add_argument('key', type=str, help='key to delete: s3://BUCKET/PATH/TO/FILE')
-
-        subparsers['prefill'].add_argument('-f', '--file', default=None, help='YAML file containing what to prefill')
-        subparsers['prefill'].add_argument('-v', '--verbose', action='store_true', default=False, help='print verbose info such as which file are getting pre-filled')
 
         subparsers['ls'].add_argument('-l', '--details', action='store_true', help='more detail')
 
@@ -38,8 +34,6 @@ class SCRunner(object):
         return parser.parse_args()
 
     def main(self):
-        import os
-
         args = self._parse_args()
 
         if args.command == 'cache':
@@ -47,11 +41,6 @@ class SCRunner(object):
 
         elif args.command == 'del':
             self.sc.delete(args.key)
-
-        elif args.command == 'prefill':
-            if args.file is not None:
-                args.file = os.path.expanduser(args.file)
-            self.sc.prefill(args.file, args.verbose)
 
         elif args.command == 'ls':
             if args.details:
