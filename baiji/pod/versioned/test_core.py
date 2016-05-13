@@ -34,7 +34,7 @@ class TestVC(CreateScratchDirectoryMixin, unittest.TestCase):
         ]
 
     def mock_vc(self):
-        from bodylabs.cache.versioned import VersionedCache
+        from baiji.pod import VersionedCache
         def sc(s, bucket=None, force_check=False, verbose=None, stacklevel=1): # mocking a real call pylint: disable=unused-argument
             # a mock of sc that doesn't do anything but
             return s.replace('s3://baiji-pod-mock-versioned-assets', '/local')
@@ -167,8 +167,8 @@ class TestVC(CreateScratchDirectoryMixin, unittest.TestCase):
         vc.update_patch("/foo/bar.csv", self.local_json_file)
         mock_cp.assert_called_with(self.local_json_file, "s3://baiji-pod-mock-versioned-assets/foo/bar.1.2.6.csv", progress=False)
 
-    @mock.patch('bodylabs.cache.versioned.VersionedCache.update')
-    @mock.patch('bodylabs.cache.versioned.VersionedCache.add')
+    @mock.patch('baiji.pod.VersionedCache.update')
+    @mock.patch('baiji.pod.VersionedCache.add')
     def test_add_or_update(self, mock_add, mock_update):
         vc = self.mock_vc()
         version = '1.2.42'

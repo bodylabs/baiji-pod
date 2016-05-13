@@ -8,8 +8,9 @@ class VersionedCacheUploader(object):
     Upon exiting the `with` block, the temporary file is
     uploaded to `vcpath` then deleted.
 
-    Note that there is a parallel tool at bodylabs.serialization.temporary.Tempfile that is designed
-    for the case where you want to do more with the file than merely upload it to vc.
+    Note that there is a parallel tool at
+    bodylabs.serialization.temporary.Tempfile that is designed for the case
+    where you want to do more with the file than merely upload it to vc.
     '''
 
     def __init__(self, versioned_cache, vcpath, version=None, major=False, minor=False, patch=False,
