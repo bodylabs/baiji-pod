@@ -26,6 +26,8 @@ class SCRunner(object):
         return parser.parse_args()
 
     def main(self):
+        from baiji.pod.util.format_bytes import format_bytes
+
         args = self._parse_args()
 
         if args.command == 'cache':
@@ -36,12 +38,11 @@ class SCRunner(object):
 
         elif args.command == 'ls':
             if args.details:
-                from bodylabs.util.numerics import sizeof_format_human_readable
                 for x in self.sc.ls():
                     outdated = 'outdated ' if x.is_outdated else ''
                     print '{is_remote} {file_size} {outdated}{age:.0f} days'.format(
                         is_remote=x.remote,
-                        file_size=sizeof_format_human_readable(x.size),
+                        file_size=format_bytes(x.size),
                         outdated=outdated,
                         age=x.age/(60*60*24)
                     ).encode('utf-8')
