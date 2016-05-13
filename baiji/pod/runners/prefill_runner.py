@@ -33,7 +33,7 @@ class PrefillRunner(object):
         else:
             parser.add_argument('--vc_manifest', default=None, type=str, help='S3 VC manifest; defaults to {}'.format(self.default_vc_manifest_path))
 
-        parser.add_argument('-f', '--file', required=True, help='YAML file containing what to prefill')
+        parser.add_argument('file', help='YAML file containing what to prefill')
         parser.add_argument(
             '-v', '--verbose', action='store_true', default=False,
             help='print verbose info such as which file are getting pre-filled')
