@@ -24,10 +24,6 @@ class SCRunner(object):
 
         subparsers['del'].add_argument('key', type=str, help='key to delete: s3://BUCKET/PATH/TO/FILE')
 
-        subparsers['keep'].add_argument('key', type=str, help='key to keep: s3://BUCKET/PATH/TO/FILE')
-
-        subparsers['free'].add_argument('key', type=str, help='key to free: s3://BUCKET/PATH/TO/FILE')
-
         subparsers['prefill'].add_argument('-f', '--file', default=None, help='YAML file containing what to prefill')
         subparsers['prefill'].add_argument('-v', '--verbose', action='store_true', default=False, help='print verbose info such as which file are getting pre-filled')
 
