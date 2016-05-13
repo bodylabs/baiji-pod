@@ -97,13 +97,6 @@ class CacheFile(object):
             return True
         return self.age > timeout
 
-    @property
-    def should_gc(self):
-        timeout = self.config.gc_timeout
-        if not timeout: # Never gc anything
-            return False
-        return self.age > timeout
-
     def download(self, verbose=True):
         if not s3.exists(self.remote):
             raise s3.KeyNotFound('{} not found on s3'.format(self.remote))

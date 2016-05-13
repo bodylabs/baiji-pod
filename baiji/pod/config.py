@@ -42,13 +42,6 @@ class Config(object):
             return None
 
     @property
-    def gc_timeout(self):
-        try:
-            return int(os.getenv('STATIC_CACHE_GARBAGE_COLLECTION_TIMEOUT', self.GARBAGE_COLLECTION_TIMEOUT))
-        except ValueError:
-            return None
-
-    @property
     def immutable_buckets(self):
         '''
         If you set this, it's a : seperated list, like a path.

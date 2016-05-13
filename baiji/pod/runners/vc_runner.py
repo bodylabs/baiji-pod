@@ -18,7 +18,9 @@ class VCRunner(object):
     def _parse_args(self):
         import argparse
 
-        parser = argparse.ArgumentParser(description='Bodylabs versioned cache tool', epilog="paths are within a particular bucket, so use / rooted paths")
+        parser = argparse.ArgumentParser(
+            description='baiji-pod versioned cache tool',
+            epilog='paths are within a particular bucket, so use / rooted paths')
 
         if self.default_bucket is None:
             parser.add_argument('--bucket', required=True, type=str, help='S3 bucket name')

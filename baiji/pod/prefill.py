@@ -17,12 +17,12 @@ class PrefillWorker(ParallelWorker):
             sys.stdout.write('.')
 
         try:
-            if remote.startswith("s3://"):
+            if remote.startswith('s3://'):
                 self.sc(remote, verbose=self.verbose)
             else:
                 self.vc(remote, verbose=self.verbose)
         except s3.KeyNotFound:
-            print "{} is in the prefill manifest, but is not found!".format(remote)
+            print '{} is in the prefill manifest, but is not found!'.format(remote)
 
 
 def prefill(self, prefill_file=None, verbose=False):
