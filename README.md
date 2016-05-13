@@ -21,19 +21,28 @@ Features
 Examples
 --------
 
-```py
-from baiji.serialization import json
-with open(filename, 'w') as f:
-    json.dump(foo, f)
-with open(filename, 'r') as f:
-    foo = json.load(foo, f)
-```
+### The static cache
 
-```py
-from baiji.serialization import json
-json.dump(filename)
-foo = json.load(filename)
-```
+Use as:
+
+    from bodylabs.cache import sc
+    sc('path') # defauly remote bucket of bodylabs-assets
+    sc('path', bucket='bodylabs-foo')
+    sc('s3://explicit-bucket-name/path')
+
+In all cases, it returns a string which is a valid local path.
+
+Algorithm:
+
+- If we have no local copy: download, mark it as checked now, and return it's path.
+- If it's less than `STATIC_CACHE_TIMEOUT` since it was last checked, return
+  its path.
+- If the md5 of the local file matches the md5 of the remote file, mark it as
+  checked now and return it's path.
+- Otherwise it's out of date and changed on s3: download, mark it as checked
+  now, and return it's path.
+
+It is safe to call multiple times &ndash; `sc(sc('path'))` will behave correctly.
 
 
 Development
