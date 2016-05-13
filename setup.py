@@ -28,7 +28,9 @@ setup(
     packages=[
         'baiji',
         'baiji/pod',
+        'baiji/pod/runners',
         'baiji/pod/util',
+        'baiji/pod/versioned',
     ],
     scripts=[
         'bin/sc',

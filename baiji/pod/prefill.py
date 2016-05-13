@@ -35,7 +35,7 @@ def prefill(self, prefill_file=None, verbose=False):
     from bodylabs.util.timer import Timer
 
     with Timer(verbose=False) as t:
-        parallel_for(SCExemptList(prefill_file), PrefillWorker, args=[self, verbose], num_processes=12)
+        parallel_for(prefill_file, PrefillWorker, args=[self, verbose], num_processes=12)
 
     print ''
     print 'sc prefill done in {} seconds'.format(t.elapsed_time_s)

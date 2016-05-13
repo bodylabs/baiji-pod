@@ -7,10 +7,8 @@ from bodylabs.util.test import BackupEnvMixin
 
 class TestSCBase(unittest.TestCase):
     def setUp(self):
-        from baiji.pod.config import Config
         from baiji.pod.static import StaticCache
-        config = Config()
-        self.sc = StaticCache(config)
+        self.sc = StaticCache.create_default()
 
 class TestSCExceptions(TestSCBase):
     def test_exceptions_interchangable_with_s3(self):

@@ -128,6 +128,12 @@ class StaticCache(object):
         self.config = config
         self.verbose = not env_flag('PRODUCTION')
 
+    @classmethod
+    def create_default(cls):
+        from baiji.pod.config import Config
+        config = Config()
+        return cls(config)
+
     def _raise_cannot_get_needed_file(self, cache_file, reason):
         from baiji.config import credentials
         from baiji.exceptions import AWSCredentialsMissing
@@ -135,13 +141,13 @@ class StaticCache(object):
         from bodylabs.util.internet import InternetUnreachableError
         from bodylabs.util.paths import core_path
 
-        msg = "Tried to access %s from cache but it was not in the cache (expected to see it at %s). Tried to download it, " % (cache_file.remote, cache_file.local)
+        msg = 'Tried to access {} from cache but it was not in the cache (expected to see it at {}). Tried to download it, '.format(cache_file.remote, cache_file.local)
         if reason is InternetUnreachableError:
             msg += "but we can't contact s3."
         elif reason is AWSCredentialsMissing:
-            msg += "but there are no s3 access credentials."
+            msg += 'but there are no s3 access credentials.'
         else:
-            msg += "but something went wrong."
+            msg += 'but something went wrong.'
         try:
             _ = credentials.key
         except AWSCredentialsMissing:
@@ -154,7 +160,7 @@ class StaticCache(object):
                 pass
             missing_assets.append(cache_file.remote)
             missing_assets = sorted(list(set(missing_assets)))
-            yaml.dump(missing_assets, missing_asset_log, default_flow_style=False)
+            yaml.dump(missing_assets, missing_asset_log)
         raise reason(msg)
 
     def __call__(self, path, bucket=None, force_check=False, verbose=None, stacklevel=1):
@@ -221,20 +227,6 @@ class StaticCache(object):
             # Remove leading bucket
             path = re.match(r'[^/\\]*(/|\\)(.*)', path).groups()[1]
         return path
-
-    def gc(self, interactive=False):
-        from baiji.util.console import confirm
-        exempt = SCExemptList()
-        for cachefile in self.ls():
-            if cachefile.should_gc and not cachefile.remote in exempt:
-                if not interactive or confirm("%s is %d days old. Delete it?" % (cachefile.remote, cachefile.age / 86400), default="yes"):
-                    cachefile.remove_cached()
-
-    def disallow_gc(self, path):
-        SCExemptList().add(CacheFile(static_cache=self, path=path).remote)
-
-    def allow_gc(self, path):
-        SCExemptList().remove(CacheFile(static_cache=self, path=path).remote)
 
     def ls(self):
         files_in_cache = []

@@ -67,7 +67,7 @@ class VersionedCache(object):
         If verbose is left at None, sc uses its global default.
         '''
         if not self.is_versioned(path):
-            raise self.KeyNotFound("%s is not a versioned path" % path)
+            raise self.KeyNotFound('{} is not a versioned path'.format(path))
         uri = self.uri(path, version)
         if not s3.exists(uri):
             raise self.KeyNotFound('{} is not cached for version {}'.format(
@@ -93,10 +93,13 @@ class VersionedCache(object):
 
     def update_manifest(self, path, version):
         from baiji.pod.util import json
+
         path = self.normalize_path(path)
+
         manifest = json.load(self.manifest_path)
         manifest[path] = version
         json.dump(manifest, self.manifest_path, sort_keys=True, indent=4)
+
         if hasattr(self, '_cache') and 'manifest' in self._cache:
             del self._cache['manifest']
 
@@ -105,14 +108,16 @@ class VersionedCache(object):
         Default version is manifest version
         '''
         path = self.normalize_path(path)
+
         if version is None:
             version = self.manifest_version(path)
         if bucket is None:
             bucket = self.bucket
+
         if self.version_number_is_valid(version):
             base_path, ext = os.path.splitext(path)
             suffixes = '.' + '.'.join(suffixes) if suffixes is not None and len(suffixes) > 0 else ''
-            return "s3://" + bucket + base_path + "." + version + suffixes + ext
+            return 's3://' + bucket + base_path + '.' + version + suffixes + ext
         elif allow_local and s3.exists(version):
             # version here is a local or s3 path
             return version
@@ -133,7 +138,7 @@ class VersionedCache(object):
         x = re.match(r'.*?\.((0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*))(\.[^\.]*)?', path)
         if x is not None:
             return x.groups()[0]
-        raise ValueError("No version string found in %s" % path)
+        raise ValueError('No version string found in {}'.format(path))
 
     def parse(self, path):
         '''
@@ -148,13 +153,15 @@ class VersionedCache(object):
     def add(self, path, local_file, version=None, verbose=False):
         path = self.normalize_path(path)
         if self.is_versioned(path):
-            raise ValueError("%s is already versioned; did you mean vc.update?", path)
+            raise ValueError('{} is already versioned; did you mean vc.update?'.format(path))
+
         if version is None:
-            version = "1.0.0"
+            version = '1.0.0'
         else:
             version = self.normalize_version_number(version)
             if not self.version_number_is_valid(version):
-                raise ValueError("invalid version %s, always use versions of the form N.N.N" % version)
+                raise ValueError('invalid version {}, always use versions of the form N.N.N'.format(version))
+
         s3.cp(local_file, self.uri(path, version), progress=verbose)
         self.update_manifest(path, version)
 
@@ -165,16 +172,18 @@ class VersionedCache(object):
         TODO This could return the versions and create date too.
 
         '''
-        paths = s3.ls("s3://" + self.bucket)
+        paths = s3.ls('s3://' + self.bucket)
         parsed = [self.parse(path) for path in paths]
-        # parsed is a list of key, version tuples
+        # parsed is a list of key, version tuples.
         return sorted(set([key for key, _ in parsed]))
 
     def versions_avaliable(self, path):
         import semantic_version
+
         path = self.normalize_path(path)
         base_path, ext = os.path.splitext(path)
-        versions = filter(lambda path: os.path.splitext(path)[1] == ext, s3.ls("s3://" + self.bucket + base_path))
+
+        versions = filter(lambda path: os.path.splitext(path)[1] == ext, s3.ls('s3://' + self.bucket + base_path))
         versions = sorted([semantic_version.Version(self.extract_version(v)) for v in versions])
         versions = [str(v) for v in versions]
         return versions
@@ -188,8 +197,10 @@ class VersionedCache(object):
 
     def normalize_version_number(self, version):
         import semantic_version
+
         if isinstance(version, basestring):
             version = semantic_version.Version(version, partial=True)
+
         if version.major is None:
             version.major = 0
         if version.minor is None:
@@ -198,6 +209,7 @@ class VersionedCache(object):
             version.patch = 0
         version.prerelease = []
         version.build = []
+
         return str(version)
 
     def manifest_matches_spec(self, path, spec):
@@ -216,7 +228,7 @@ class VersionedCache(object):
         return semantic_version.Spec(str(spec)).match(semantic_version.Version(str(version)))
 
     def apply_min_version(self, version, min_version):
-        if self.version_matches_spec(version, ">="+min_version):
+        if self.version_matches_spec(version, '>='+min_version):
             return version
         else:
             return self.normalize_version_number(min_version)
@@ -253,10 +265,13 @@ class VersionedCache(object):
         will be updated to be max(min_version, version_from_major_minor_or_patch).
         """
         import semantic_version
+
         path = self.normalize_path(path)
+
         latest_version = self.latest_available_version(path)
         if latest_version is None:
-            raise self.KeyNotFound("%s is not a versioned path; did you mean vc.add?" % path)
+            raise self.KeyNotFound('{} is not a versioned path; did you mean vc.add?'.format(path))
+
         if version is None:
             version = semantic_version.Version(latest_version)
             if major:
@@ -269,17 +284,20 @@ class VersionedCache(object):
             elif patch:
                 version.patch += 1
             else:
-                raise ValueError("Umm.... what did you want to update the version to?")
+                raise ValueError('Umm.... what did you want to update the version to?')
             if min_version is not None:
                 version = self.apply_min_version(version, min_version)
             version = str(version)
         else:
             version = self.normalize_version_number(version)
+
         if not self.version_number_is_valid(version):
-            raise ValueError("invalid version %s, always use versions of the form N.N.N" % version)
+            raise ValueError('Invalid version {}, always use versions of the form N.N.N'.format(version))
+
         latest_version = self.latest_available_version(path)
         if semantic_version.Version(version) <= semantic_version.Version(latest_version):
-            raise ValueError("version numbers must be strictly increasing. You specified %s but there is already a %s", version, latest_version)
+            raise ValueError('Version numbers must be strictly increasing. You specified {} but there is already a {}'.format(version, latest_version))
+
         s3.cp(local_file, self.uri(path, version), progress=verbose)
         self.update_manifest(path, version)
 

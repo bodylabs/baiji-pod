@@ -35,7 +35,7 @@ def command_is_in_path?(command)
     system("which #{ command} > /dev/null 2>&1")
 end
 
-task :test do
+task :unittest do
   raise unless system "nose2"
 end
 

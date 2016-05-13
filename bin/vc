@@ -1,106 +1,23 @@
 #!/usr/bin/env python
+#
+# If you wish to inject your own StaticCache configuration, set a default
+# bucket, or override the default manifest path, make a copy of this file.
 
-import argparse
-from bodylabs.cache.versioned import vc, VersionedCache
+def main():
+    import sys
+    from baiji.pod import StaticCache
+    from baiji.pod.runners.vc_runner import VCRunner
+
+    sc = StaticCache.create_default()
+
+    runner = VCRunner(
+        static_cache=sc,
+        default_manifest_path='versioned_assets.json',
+        default_bucket=None)
+
+    return_status = runner.main()
+
+    sys.exit(return_status)
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Bodylabs versioned cache tool', epilog="paths are within a particular bucket, so use / rooted paths")
-    parser.add_argument('--manifest', default=None, type=str, help="Version manifest; defaults to core's own maifest")
-    parser.subs = parser.add_subparsers(help='sub-command help', dest='command')
-    subparsers = {}
-    subparsers['add'] = parser.subs.add_parser('add', help='start versioning a file')
-    subparsers['update'] = parser.subs.add_parser('update', help='update a versioned file')
-    subparsers['versions'] = parser.subs.add_parser('versions', help='list versions avaliable for a versioned file')
-    subparsers['sync'] = parser.subs.add_parser('sync', help='sync a manifest to a local directory')
-    subparsers['ls'] = parser.subs.add_parser('ls', help='list versioned files in the manifest')
-    subparsers['ls-remote'] = parser.subs.add_parser('ls-remote', help='list versioned files in the storage bucket')
-    subparsers['get'] = parser.subs.add_parser('get', help='download a file')
-    subparsers['path'] = parser.subs.add_parser('path', help='cache the file locally and output its path (e.g. open `vc path /templates/2015/low.obj`)')
-    subparsers['open'] = parser.subs.add_parser('open', help='cache the file locally and open it using /usr/bin/open')
-    subparsers['path-remote'] = parser.subs.add_parser('path-remote', help="output the file's remote path")
-    subparsers['cat'] = parser.subs.add_parser('cat', help='write the contents of a file to stdout')
-    subparsers['publish'] = parser.subs.add_parser('publish', help='publish files in a manifest to a public, https accessible location')
-
-    subparsers['add'].add_argument('path', type=str, help='path to store the file at')
-    subparsers['add'].add_argument('file', type=str, help='file to cache (may be local or on s3)')
-
-    subparsers['update'].add_argument('path', type=str, help='path to store the file at')
-    subparsers['update'].add_argument('file', type=str, help='file to cache (may be local or on s3)')
-    subparsers['update'].add_argument('--major', default=False, action='store_true', help='This is a major update')
-    subparsers['update'].add_argument('--minor', default=False, action='store_true', help='This is a minor update')
-    subparsers['update'].add_argument('--patch', default=False, action='store_true', help='This is a patch update')
-
-    subparsers['versions'].add_argument('path', type=str, help='path to list versions for')
-
-    subparsers['sync'].add_argument('destination', type=str, help='path to sync the manifest to')
-
-    subparsers['get'].add_argument('path', type=str, help='path to get')
-    subparsers['get'].add_argument('version', type=str, nargs='?', help='version to get')
-    subparsers['get'].add_argument('destination', type=str, help='path to write the file to')
-
-    subparsers['path'].add_argument('path', type=str, help='path to get')
-    subparsers['path'].add_argument('version', type=str, nargs='?', help='version to get')
-
-    subparsers['open'].add_argument('path', type=str, help='path to get')
-    subparsers['open'].add_argument('version', type=str, nargs='?', help='version to get')
-
-    subparsers['path-remote'].add_argument('path', type=str, help='path to get')
-    subparsers['path-remote'].add_argument('version', type=str, nargs='?', help='version to get')
-
-    subparsers['cat'].add_argument('path', type=str, help='path to cat')
-    subparsers['cat'].add_argument('version', type=str, nargs='?', help='version to cat')
-
-    subparsers['publish'].add_argument('path', type=str, nargs='?', help='path to publish, if not specified, everything in manifest')
-    subparsers['publish'].add_argument('version', type=str, nargs='?', help='version to publish')
-
-    args = parser.parse_args()
-
-    if args.manifest is not None:
-        vc_to_use = VersionedCache(args.manifest)
-    else:
-        vc_to_use = vc
-
-    if args.command == 'add':
-        vc_to_use.add(args.path, args.file, version="1.0.0", verbose=True)
-    if args.command == 'update':
-        vc_to_use.update(args.path, args.file, major=args.major, minor=args.minor, patch=args.patch, verbose=True)
-    if args.command == 'versions':
-        for v in vc_to_use.versions_avaliable(args.path):
-            print v
-    if args.command == 'sync':
-        from baiji import s3
-        print "sync to %s" % args.destination
-        for f in vc_to_use.manifest_files:
-            target = s3.path.join(args.destination, f[1:])
-            print "copying %s version %s to %s" % (f, vc_to_use.manifest_version(f), target)
-            s3.cp(vc_to_use(f), target, force=True)
-    if args.command == 'ls':
-        print '\n'.join(sorted(vc.manifest_files))
-    if args.command == 'ls-remote':
-        print '\n'.join(sorted(vc.ls_remote()))
-    if args.command == 'get':
-        from baiji import s3
-        f = vc_to_use(args.path, version=args.version)
-        print "copying %s version %s to %s" % (args.path, vc_to_use.manifest_version(args.path), args.destination)
-        s3.cp(f, args.destination)
-    if args.command == 'path':
-        print vc_to_use(args.path, version=args.version)
-    if args.command == 'open':
-        import subprocess
-        subprocess.call(['open', vc_to_use(args.path, version=args.version)])
-    if args.command == 'path-remote':
-        print vc_to_use.uri(args.path, version=args.version)
-    if args.command == 'cat':
-        import fileinput, shutil, sys
-        f = vc_to_use(args.path, version=args.version)
-        shutil.copyfileobj(open(f, 'rb'), sys.stdout)
-    if args.command == 'publish':
-        from bodylabs.cache.publish_to_cdn import Publisher
-        pub = Publisher(vc_to_use)
-        if args.path is not None:
-            url = pub.publish(args.path, args.version)
-            print "publish %s version %s as %s" % (args.path, args.version, url)
-        else:
-            for f in vc_to_use.manifest_files:
-                url = pub.publish(f)
-                print "publish %s version %s as %s" % (f, vc_to_use.manifest_version(f), url)
+    main()
