@@ -20,7 +20,6 @@ class Config(object):
     DEFAULT_BUCKET = None
     CACHE_DIR = os.path.expanduser('~/.baiji_static_cache')
     TIMEOUT = 86400  # One day.
-    GARBAGE_COLLECTION_TIMEOUT = 2592000  # 30 days.
     IMMUTABLE_BUCKETS = []
 
     @property
