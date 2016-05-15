@@ -24,14 +24,23 @@ class PrefillRunner(object):
         parser = argparse.ArgumentParser(description='baiji-pod prefill tool')
 
         if self.default_vc_bucket is None:
-            parser.add_argument('--vc_bucket', required=True, type=str, help='S3 bucket name for VC paths')
+            parser.add_argument(
+                '--vc_bucket', required=True, type=str,
+                help='S3 bucket name for VC paths')
         else:
-            parser.add_argument('--vc_bucket', default=None, type=str, help='S3 bucket name for VC paths; defaults to {}'.format(self.default_vc_bucket))
+            parser.add_argument(
+                '--vc_bucket', default=None, type=str,
+                help='S3 bucket name for VC paths; defaults to {}'.format(
+                    self.default_vc_bucket))
 
         if self.default_vc_manifest_path is None:
-            parser.add_argument('--vc_manifest', required=True, type=str, help='S3 VC manifest')
+            parser.add_argument(
+                '--vc_manifest', required=True, type=str, help='S3 VC manifest')
         else:
-            parser.add_argument('--vc_manifest', default=None, type=str, help='S3 VC manifest; defaults to {}'.format(self.default_vc_manifest_path))
+            parser.add_argument(
+                '--vc_manifest', default=None, type=str,
+                help='S3 VC manifest; defaults to {}'.format(
+                    self.default_vc_manifest_path))
 
         parser.add_argument('file', help='YAML file containing what to prefill')
         parser.add_argument(

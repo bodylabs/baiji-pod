@@ -1,12 +1,12 @@
 class VersionedCacheUploader(object):
     '''
-    `VersionedCacheUploader` is intended to be used with `with` blocks:
+    `VersionedCacheUploader` is intended to be used as a context manager:
 
         with VersionedCacheUploader(vcpath) as f:
             # write content to the file
 
-    Upon exiting the `with` block, the temporary file is
-    uploaded to `vcpath` then deleted.
+    Upon exiting the `with` block, the temporary file is uploaded to `vcpath`
+    then deleted.
 
     Note that there is a parallel tool at
     bodylabs.serialization.temporary.Tempfile that is designed for the case
@@ -32,7 +32,14 @@ class VersionedCacheUploader(object):
 
     def __exit__(self, exception_type, exception_value, traceback):
         self.vc.add_or_update(
-            self.vcpath, self.tf.name, version=self.version, major=self.major, minor=self.minor,
-            patch=self.patch, min_version=self.min_version, verbose=self.verbose)
+            self.vcpath,
+            self.tf.name,
+            version=self.version,
+            major=self.major,
+            minor=self.minor,
+            patch=self.patch,
+            min_version=self.min_version,
+            verbose=self.verbose)
+
         # When we close the file here, NamedTemporaryFile deletes it as well.
         self.tf.close()

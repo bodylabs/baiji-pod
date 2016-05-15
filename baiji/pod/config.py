@@ -1,33 +1,26 @@
-'''
-Env Variables:
-
- - STATIC_CACHE_DIR: Where we store the cache. Defaults to `~/.baiji_cache`.
- - STATIC_CACHE_DEFAULT_BUCKET: If no bucket is given, we default to bodylabs-assets.
- - STATIC_CACHE_TIMEOUT: Time we assume the file is good for. If an integer,
-     it's in seconds; if not an integer, means we never check for changes.
-     Defaults to one day.
-
-'''
-
 import os
 
 class Config(object):
     '''
-    To declare your own defaults, you may subclass this config and inject it
-    into the StaticCache object.
+    To configure baiji-pod, you can override this config (by subclassing
+    or instantiating a singleton, and setting your own versions of these
+    variables. Pass your config object to the AssetCache constructor.
+
+    You can also make your own copy of the `baiji-cache` and `vc` runners
+    which use your configuration.
+
+    Alternatively, you can configure baiji-pod using environment variables.
     '''
-
-    DEFAULT_BUCKET = None
-    CACHE_DIR = os.path.expanduser('~/.baiji_static_cache')
-    TIMEOUT = 86400  # One day.
+    CACHE_DIR = os.path.expanduser('~/.baiji_cache')
+    TIMEOUT = 86400  # == one day.
     IMMUTABLE_BUCKETS = []
-
-    @property
-    def default_bucket(self):
-        return os.getenv('STATIC_CACHE_DEFAULT_BUCKET', self.DEFAULT_BUCKET)
+    DEFAULT_BUCKET = None
 
     @property
     def cache_dir(self):
+        '''
+        Where we store the cache. Defaults to `~/.baiji_cache`.
+        '''
         cache_dir = os.getenv('STATIC_CACHE_DIR', self.CACHE_DIR)
         if cache_dir[-1] != os.sep:
             cache_dir += os.sep
@@ -35,6 +28,11 @@ class Config(object):
 
     @property
     def timeout(self):
+        '''
+        Time we assume the file is good for. If an integer, it's in seconds;
+        if not an integer, means we never check for changes. Defaults to one
+        day.
+        '''
         try:
             return int(os.getenv('STATIC_CACHE_TIMEOUT', self.TIMEOUT))
         except ValueError:
@@ -52,3 +50,11 @@ class Config(object):
             return os.environ['STATIC_CACHE_IMMUTABLE_BUCKETS'].split(':')
         except KeyError:
             return self.IMMUTABLE_BUCKETS
+
+    @property
+    def default_bucket(self):
+        '''
+        The default bucket, used to handle an call to sc on a path with no
+        bucket name. Deprecated.
+        '''
+        return os.getenv('STATIC_CACHE_DEFAULT_BUCKET', self.DEFAULT_BUCKET)

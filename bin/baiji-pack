@@ -6,11 +6,11 @@
 def main():
     import sys
     from baiji.pod import StaticCache
-    from baiji.pod.runners.pack_runner import PackRunner
+    from baiji.pod.runners.asset_pack_runner import AssetPackRunner
 
     sc = StaticCache.create_default()
 
-    runner = PackRunner(
+    runner = AssetPackRunner(
         static_cache=sc,
         default_vc_manifest_path='versioned_assets.json',
         default_vc_bucket=None)

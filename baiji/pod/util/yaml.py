@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 
-from baiji.util.yaml import load  # For convenience. pylint: disable=unused-import
+from baiji.util.yaml import load  # For the caller's convenience. pylint: disable=unused-import
 
 def dump(obj, path):
     '''

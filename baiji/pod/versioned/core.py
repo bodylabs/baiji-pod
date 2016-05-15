@@ -5,56 +5,19 @@ from bodylabs.util.decorators import cached_property
 
 class VersionedCache(object):
     '''
-    The idea here is to have a cache system like sc where you specify a file by path
-    in a particular bucket. Unlike sc here we might have many different versions of a
-    given file and when you ask for it you get the version that's specified in your
-    manifest.json file. This way we can have multiple versions of an asset living on s3
-    and each version of the code can have an identifier checked in that tells it which
-    version it's compatible with.
+    Encapsulate a repository of version-tracked files, which are backed by a
+    single S3 bucket and indexed by a single manifest file.
 
-    manifest.json looks like this:
-        {
-            "/foo/bar.csv": "1.2.5",
-            "/foo/bar.json": "0.1.6"
-        }
-    To get the file (or rather a local path to the file, like sc), you call
-        vc("/foo/bar.csv")
-    There might be several versions of this file in the bucket, but you have a particular
-    version number committed, so you know you'll get the version you're expecting.
-
-    When you're developing though, you often want to try out variations on a file before
-    committing to a particular one. Rather than incrementing the patch level over and over,
-    you can set manifest.json to include an absolute path:
-        "/foo/bar.csv": "/Users/me/Desktop/foo.obj",
-    This can be either a local or an s3 path; use local if you're iterating by yourself,
-    and s3 (in bodylabs-assets or something) if you want to try something on staging, for
-    example.
-
-    The bucket bodylabs-versioned-assets is intended as immutable; nothing there should ever
-    be changed or deleted. Only new versions added.
-
-    Adding a new file to versioning or updating a versioned file is best done using the vc
-    command line tool:
-        vc add /foo/bar.csv ~/Desktop/bar.csv
-        vc update --major /foo/bar.csv ~/Desktop/new_bar.csv
-        vc update --minor /foo/bar.csv ~/Desktop/new_bar.csv
-        vc update --patch /foo/bar.csv ~/Desktop/new_bar.csv
-
-    Evenutually we should use semantic_version for parsing and comparing version strings...
-
-    A VersionedCache object is specific to a manifest file and a bucket; the default vc object
-    is tied to the core/bodylabs/cache/manifest.json file and the bodylabs-versioned-assets
-    bucket.
+    Delegates the caching and file management to the underlying asset cache.
     '''
     KeyNotFound = s3.KeyNotFound
 
-    def __init__(self, static_cache, manifest_path, bucket):
+    def __init__(self, asset_cache, manifest_path, bucket):
         '''
         manifest_path: A path to the vesioned cache manifest JSON file.
         bucket: The bucket containing the versioned assets.
         '''
-        self.sc = static_cache
-        # If we did any dynamic creation of the version manifest, we'd do it here
+        self.sc = asset_cache
         self.manifest_path = manifest_path
         self.bucket = bucket
 
@@ -63,8 +26,11 @@ class VersionedCache(object):
 
     def cached_file(self, path, version=None, verbose=None):
         '''
-        Default version is manifest version. In almost all cases you want to pass nothing for version.
-        If verbose is left at None, sc uses its global default.
+        Default version is manifest version. In almost all cases you want to
+        pass nothing for version.
+
+        If verbose is left at None, uses the underlying asset cache's global
+        default.
         '''
         if not self.is_versioned(path):
             raise self.KeyNotFound('{} is not a versioned path'.format(path))
@@ -310,26 +276,37 @@ class VersionedCache(object):
     def update_patch(self, path, local_file, verbose=False):
         self.update(path, local_file, patch=True, verbose=verbose)
 
-    def add_or_update(self, path, local_file, version=None, major=False, minor=False, patch=False, min_version=None, verbose=False):
+    def add_or_update(self, path, local_file,
+                      version=None, major=False, minor=False, patch=False,
+                      min_version=None, verbose=False):
         if self.is_versioned(path):
-            self.update(path, local_file, version=version, major=major, minor=minor, patch=patch, min_version=min_version, verbose=verbose)
+            self.update(
+                path, local_file,
+                version=version, major=major, minor=minor, patch=patch,
+                min_version=min_version, verbose=verbose)
         else:
             self.add(path, local_file, version=version, verbose=verbose)
 
-    def add_or_update_major(self, path, local_file, min_version=None, verbose=False):
+    def add_or_update_major(self,path, local_file, min_version=None, verbose=False):
         if self.is_versioned(path):
-            self.update(path, local_file, major=True, min_version=min_version, verbose=verbose)
+            self.update(
+                path, local_file,
+                major=True, min_version=min_version, verbose=verbose)
         else:
             self.add(path, local_file, version=min_version, verbose=verbose)
 
     def add_or_update_minor(self, path, local_file, min_version=None, verbose=False):
         if self.is_versioned(path):
-            self.update(path, local_file, minor=True, min_version=min_version, verbose=verbose)
+            self.update(
+                path, local_file,
+                minor=True, min_version=min_version, verbose=verbose)
         else:
             self.add(path, local_file, version=min_version, verbose=verbose)
 
     def add_or_update_patch(self, path, local_file, min_version=None, verbose=False):
         if self.is_versioned(path):
-            self.update(path, local_file, patch=True, min_version=min_version, verbose=verbose)
+            self.update(
+                path, local_file,
+                patch=True, min_version=min_version, verbose=verbose)
         else:
             self.add(path, local_file, version=min_version, verbose=verbose)

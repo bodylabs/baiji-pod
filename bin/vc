@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 #
-# If you wish to inject your own StaticCache configuration, set a default
-# bucket, or override the default manifest path, make a copy of this file.
+# If you wish to inject your own configuration, set a default bucket, or
+# override the default manifest path, make a copy of this file.
 
 def main():
     import sys
-    from baiji.pod import StaticCache
+    from baiji.pod import AssetCache
     from baiji.pod.runners.vc_runner import VCRunner
 
-    sc = StaticCache.create_default()
+    sc = AssetCache.create_default()
 
     runner = VCRunner(
         static_cache=sc,

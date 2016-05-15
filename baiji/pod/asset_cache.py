@@ -30,7 +30,8 @@ class CacheFile(object):
         local_path = self.path[1:]
         if os.sep != '/':
             local_path = local_path.replace('/', os.sep)
-        return CachedPath(os.path.join(self.config.cache_dir, self.bucket, local_path))
+        full_local_path = os.path.join(self.config.cache_dir, self.bucket, local_path)
+        return CachedPath(full_local_path)
 
     @property
     def remote(self):
@@ -38,7 +39,11 @@ class CacheFile(object):
 
     @property
     def timestamp_file(self):
-        return os.path.join(self.config.cache_dir, '.timestamps', self.bucket, self.path[1:])
+        return os.path.join(
+            self.config.cache_dir,
+            '.timestamps',
+            self.bucket,
+            self.path[1:])
 
     @property
     def timestamp(self):
@@ -93,7 +98,7 @@ class CacheFile(object):
         remove_tree(self.local)
 
 
-class StaticCache(object):
+class AssetCache(object):
     KeyNotFound = s3.KeyNotFound
 
     def __init__(self, config):
@@ -114,17 +119,21 @@ class StaticCache(object):
         from bodylabs.util.internet import InternetUnreachableError
         from bodylabs.util.paths import core_path
 
-        msg = 'Tried to access {} from cache but it was not in the cache (expected to see it at {}). Tried to download it, '.format(cache_file.remote, cache_file.local)
+        msg = 'Tried to access {} from cache '.format(cache_file.remote)
+        msg += 'but it was not in the cache '
+        msg += '(expected to see it at {}). '.format(cache_file.local)
+        msg += 'Tried to download it, '
         if reason is InternetUnreachableError:
             msg += "but we can't contact s3."
         elif reason is AWSCredentialsMissing:
             msg += 'but there are no s3 access credentials.'
         else:
             msg += 'but something went wrong.'
+
         try:
             _ = credentials.key
         except AWSCredentialsMissing:
-            msg += " If you are an external user, contact Body Labs to get a copy of this file. We've written this to a list of files you're missing in missing_assets.txt"
+            msg += " We've written this to a list of files you're missing in missing_assets.txt"
             missing_asset_log = os.path.join(core_path(), 'missing_assets.yaml')
             missing_assets = []
             try:
@@ -134,10 +143,22 @@ class StaticCache(object):
             missing_assets.append(cache_file.remote)
             missing_assets = sorted(list(set(missing_assets)))
             yaml.dump(missing_assets, missing_asset_log)
+
         raise reason(msg)
 
     def __call__(self, path, bucket=None, force_check=False, verbose=None, stacklevel=1):
         '''
+        Algorithm:
+
+        - If we have no local copy: download, mark it as checked now, and
+          return its path.
+        - If it's less than `config.TIMEOUT` since it was last checked,
+          return its path.
+        - If the md5 of the local file matches the md5 of the remote file, mark
+          it as checked now and return it's path.
+        - Otherwise it's out of date and changed on s3: download, mark it as
+          checked now, and return it's path.
+
         stacklevel: When `verbose` is `True`, how far up the stack to look when
             printing debug output. 1 means the immediate caller, 2 its caller,
             and so on. Useful when calls to sc() are wrapped, such as in vc().
@@ -160,7 +181,7 @@ class StaticCache(object):
         if not cache_file.is_cached:
             try:
                 assert_internet_reachable()
-                maybe_print("Downloading missing file {}".format(cache_file.remote))
+                maybe_print('Downloading missing file {}'.format(cache_file.remote))
                 cache_file.download(verbose=verbose)
             except (socket.gaierror, InternetUnreachableError):
                 self._raise_cannot_get_needed_file(cache_file, InternetUnreachableError)
@@ -172,10 +193,12 @@ class StaticCache(object):
                 if s3.etag(cache_file.remote) == s3.etag(cache_file.local):
                     cache_file.update_timestamp()
                 else:
-                    maybe_print("Downloading outdated file {}".format(cache_file.remote))
+                    maybe_print('Downloading outdated file {}'.format(cache_file.remote))
                     cache_file.download(verbose=verbose)
             except (socket.gaierror, InternetUnreachableError, AWSCredentialsMissing):
-                maybe_print("File {} may be outdated, but we can't contact s3, so let's assume it's ok".format(cache_file.remote))
+                maybe_print(
+                    ("File {} may be outdated, but we can't contact s3, " +
+                     "so let's assume it's ok").format(cache_file.remote))
         return cache_file.local
 
     def invalidate(self, path, bucket=None):
@@ -183,13 +206,16 @@ class StaticCache(object):
 
     def invalidate_all(self):
         import shutil
-        shutil.rmtree(os.path.join(self.config.cache_dir, '.timestamps'), ignore_errors=True)
+        shutil.rmtree(
+            os.path.join(self.config.cache_dir, '.timestamps'),
+            ignore_errors=True)
 
     def delete(self, path, bucket=None):
         CacheFile(static_cache=self, path=path, bucket=bucket).remove_cached()
 
     def is_cachefile(self, path):
-        return isinstance(path, CachedPath) or os.path.expanduser(path).startswith(self.config.cache_dir)
+        return isinstance(path, CachedPath) or \
+            os.path.expanduser(path).startswith(self.config.cache_dir)
 
     def un_sc(self, path):
         '''un_sc(sc(foo)) == foo'''
