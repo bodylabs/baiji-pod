@@ -13,3 +13,4 @@ TODO
 - Use scratch-dir
 - inspectlib.stack_frame_info
 - util.internet reachability
+- Restore CDN publish functionality in core
