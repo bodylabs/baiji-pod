@@ -1,6 +1,6 @@
 import os
 from baiji import s3
-from bodylabs.util.decorators import cached_property
+from cached_property import cached_property
 
 
 class VersionedCache(object):
