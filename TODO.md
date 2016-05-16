@@ -2,7 +2,7 @@ TODO
 ====
 
 - Add vc config to config
-- Use config without subclassing
+- Use config without subclassing. Pass overries to init
 - Configure using an importable config path instead of injecting
 - test_asset_cache.py: Remove use of environs, remove BackupEnvMixin
 - Remove use of PRODUCTION env var
