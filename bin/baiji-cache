@@ -1,16 +1,15 @@
 #!/usr/bin/env python
 #
-# If you wish to inject your own StaticCache configuration, make a copy of
-# this file.
+# If you wish to inject your own configuration, make a copy of this file.
 
 def main():
     import sys
-    from baiji.pod import StaticCache
-    from baiji.pod.runners.sc_runner import SCRunner
+    from baiji.pod import AssetCache
+    from baiji.pod.runners.cache_util_runner import CacheUtilRunner
 
-    sc = StaticCache.create_default()
+    cache = AssetCache.create_default()
 
-    runner = SCRunner(sc)
+    runner = CacheUtilRunner(cache)
     return_status = runner.main()
 
     sys.exit(return_status)

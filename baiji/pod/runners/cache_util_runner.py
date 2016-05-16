@@ -1,4 +1,4 @@
-class SCRunner(object):
+class CacheUtilRunner(object):
     def __init__(self, static_cache):
         self.sc = static_cache
 
