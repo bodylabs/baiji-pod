@@ -12,12 +12,13 @@ class VersionedCache(object):
     '''
     KeyNotFound = s3.KeyNotFound
 
-    def __init__(self, asset_cache, manifest_path, bucket):
+    def __init__(self, cache, manifest_path, bucket):
         '''
+        cache: An instance of AssetCache.
         manifest_path: A path to the vesioned cache manifest JSON file.
         bucket: The bucket containing the versioned assets.
         '''
-        self.sc = asset_cache
+        self.cache = cache
         self.manifest_path = manifest_path
         self.bucket = bucket
 
@@ -38,7 +39,7 @@ class VersionedCache(object):
         if not s3.exists(uri):
             raise self.KeyNotFound('{} is not cached for version {}'.format(
                 path, version))
-        return self.sc(uri, verbose=verbose, stacklevel=2)
+        return self.cache(uri, verbose=verbose, stacklevel=2)
 
     @cached_property
     def manifest(self):
@@ -287,7 +288,7 @@ class VersionedCache(object):
         else:
             self.add(path, local_file, version=version, verbose=verbose)
 
-    def add_or_update_major(self,path, local_file, min_version=None, verbose=False):
+    def add_or_update_major(self, path, local_file, min_version=None, verbose=False):
         if self.is_versioned(path):
             self.update(
                 path, local_file,

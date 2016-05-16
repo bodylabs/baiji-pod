@@ -6,16 +6,16 @@ from bodylabs.util.test import BackupEnvMixin
 
 class TestSCBase(unittest.TestCase):
     def setUp(self):
-        from baiji.pod.static import AssetCache
-        self.sc = AssetCache.create_default()
+        from baiji.pod import AssetCache
+        self.cache = AssetCache.create_default()
 
 class TestSCExceptions(TestSCBase):
     def test_exceptions_interchangable_with_s3(self):
-        from baiji.pod.static import AssetCache
+        from baiji.pod import AssetCache
         with self.assertRaises(s3.KeyNotFound):
-            self.sc('s3://bodylabs-test/there/is/nothing/here/without.a.doubt')
+            self.cache('s3://bodylabs-test/there/is/nothing/here/without.a.doubt')
         with self.assertRaises(AssetCache.KeyNotFound):
-            self.sc('s3://bodylabs-test/there/is/nothing/here/without.a.doubt')
+            self.cache('s3://bodylabs-test/there/is/nothing/here/without.a.doubt')
 
 class TestSC(BackupEnvMixin, TestSCBase):
     @staticmethod
@@ -33,7 +33,7 @@ class TestSC(BackupEnvMixin, TestSCBase):
 
         super(TestSC, self).setUp()
 
-        self.sc.verbose = False
+        self.cache.verbose = False
 
         self.cache_dir = tempfile.mkdtemp('BODYLABS_TEST_STATIC_CACHE_DIR')
         self.bucket = 'bodylabs-test'
@@ -62,28 +62,28 @@ class TestSC(BackupEnvMixin, TestSCBase):
     def test_basic_functionality(self):
         self.assertFalse(os.path.exists(self.local_file))
         self.assertFalse(os.path.exists(self.timestamp_file))
-        self.assertEqual(self.sc(self.filename), self.local_file)
+        self.assertEqual(self.cache(self.filename), self.local_file)
         self.assertTrue(os.path.exists(self.local_file))
         self.assertTrue(os.path.exists(self.timestamp_file))
 
     def test_doesnt_check_before_timeout(self):
-        self.sc(self.filename)
+        self.cache(self.filename)
         with mock.patch('baiji.s3.cp') as mock_cp:
             mock_cp.return_value = True
-            self.sc(self.filename)
+            self.cache(self.filename)
             assert not mock_cp.called, 'File downloaded before timeout'
 
     def test_does_check_after_timeout(self):
         import time
 
-        self.sc(self.filename)
+        self.cache(self.filename)
 
         s3.cp(self.get_test_file_path(), self.remote_file, force=True)
         time.sleep(2)
 
         with mock.patch('baiji.s3.cp') as mock_cp:
             mock_cp.return_value = True
-            self.sc(self.filename)
+            self.cache(self.filename)
             mock_cp.assert_called_with(
                 self.remote_file, self.local_file,
                 progress=False, force=True, validate=True)
@@ -91,14 +91,14 @@ class TestSC(BackupEnvMixin, TestSCBase):
     def test_that_invalidating_nonexistent_file_succeeds(self):
         import uuid
         nonexistent_path = str(uuid.uuid4()) + '.txt'
-        self.sc.invalidate(nonexistent_path)
+        self.cache.invalidate(nonexistent_path)
 
     def test_that_invalidating_single_file_removes_its_timestamp(self):
-        self.sc(self.filename)
+        self.cache(self.filename)
         self.assertTrue(os.path.exists(self.local_file))
         self.assertTrue(os.path.exists(self.timestamp_file))
 
-        self.sc.invalidate(self.filename)
+        self.cache.invalidate(self.filename)
         self.assertTrue(os.path.exists(self.local_file))
         self.assertFalse(os.path.exists(self.timestamp_file))
 
@@ -109,7 +109,7 @@ class TestSC(BackupEnvMixin, TestSCBase):
         for filename in filenames:
             remote_file = 's3://{}/{}'.format(self.bucket, filename)
             s3.cp(self.temp_file, remote_file)
-            self.sc(filename)
+            self.cache(filename)
             s3.rm(remote_file)
 
         for filename in filenames:
@@ -117,7 +117,7 @@ class TestSC(BackupEnvMixin, TestSCBase):
                 self.cache_dir, '.timestamps', self.bucket, filename)
             self.assertTrue(os.path.exists(timestamp_file))
 
-        self.sc.invalidate(path)
+        self.cache.invalidate(path)
         for filename in filenames:
             timestamp_file = os.path.join(
                 self.cache_dir, '.timestamps', self.bucket, filename)

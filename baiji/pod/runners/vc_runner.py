@@ -1,6 +1,6 @@
 class VCRunner(object):
-    def __init__(self, static_cache, default_manifest_path=None, default_bucket=None):
-        self.sc = static_cache
+    def __init__(self, cache, default_manifest_path=None, default_bucket=None):
+        self.cache = cache
         self.default_manifest_path = default_manifest_path
         self.default_bucket = default_bucket
 
@@ -14,7 +14,7 @@ class VCRunner(object):
             bucket = self.default_bucket
 
         return VersionedCache(
-            static_cache=self.sc,
+            cache=self.cache,
             manifest_path=manifest_path,
             bucket=bucket)
 

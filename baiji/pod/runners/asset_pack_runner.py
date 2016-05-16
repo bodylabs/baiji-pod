@@ -1,9 +1,9 @@
 class AssetPackRunner(object):
     def __init__(self,
-                 static_cache,
+                 cache,
                  default_vc_manifest_path=None,
                  default_vc_bucket=None):
-        self.sc = static_cache
+        self.cache = cache
         self.default_vc_manifest_path = default_vc_manifest_path
         self.default_vc_bucket = default_vc_bucket
 
@@ -17,7 +17,7 @@ class AssetPackRunner(object):
             bucket = self.default_vc_bucket
 
         return VersionedCache(
-            static_cache=self.sc,
+            cache=self.cache,
             manifest_path=manifest_path,
             bucket=bucket)
 
@@ -68,7 +68,7 @@ class AssetPackRunner(object):
 
     def main(self):
         import os
-        from baiji.pod import pack
+        from baiji.pod import asset_pack
         from baiji.pod.util import yaml
 
         args = self._parse_args()
@@ -78,10 +78,10 @@ class AssetPackRunner(object):
                 manifest_path=args.vc_manifest,
                 bucket=args.vc_bucket)
             paths = yaml.load(os.path.expanduser(args.file))
-            pack.dump(self.sc, vc, paths, args.save_to, max_size=args.max_size)
+            asset_pack.dump(self.cache, vc, paths, args.save_to, max_size=args.max_size)
 
         elif args.command == 'load':
-            pack.load(self.sc, args.files)
+            asset_pack.load(self.cache, args.files)
 
         # On success, exit with status code of 0.
         return 0

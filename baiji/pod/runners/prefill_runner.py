@@ -1,6 +1,6 @@
 class PrefillRunner(object):
-    def __init__(self, static_cache, default_vc_manifest_path=None, default_vc_bucket=None):
-        self.sc = static_cache
+    def __init__(self, cache, default_vc_manifest_path=None, default_vc_bucket=None):
+        self.cache = cache
         self.default_vc_manifest_path = default_vc_manifest_path
         self.default_vc_bucket = default_vc_bucket
 
@@ -14,7 +14,7 @@ class PrefillRunner(object):
             bucket = self.default_vc_bucket
 
         return VersionedCache(
-            static_cache=self.sc,
+            cache=self.cache,
             manifest_path=manifest_path,
             bucket=bucket)
 
@@ -64,7 +64,7 @@ class PrefillRunner(object):
             print 'Nothing to prefill!'
         else:
             prefill(
-                static_cache=self.sc,
+                static_cache=self.cache,
                 versioned_cache=vc,
                 paths=paths,
                 verbose=args.verbose)

@@ -11,7 +11,7 @@ def main():
     sc = AssetCache.create_default()
 
     runner = VCRunner(
-        static_cache=sc,
+        cache=sc,
         default_manifest_path='versioned_assets.json',
         default_bucket=None)
 

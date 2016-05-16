@@ -36,15 +36,15 @@ class TestVC(CreateScratchDirectoryMixin, unittest.TestCase):
 
     def mock_vc(self):
         from baiji.pod import VersionedCache
-        def sc(s, bucket=None, force_check=False, verbose=None, stacklevel=1):
+        def cache(s, bucket=None, force_check=False, verbose=None, stacklevel=1):
             '''
-            a mock of sc that doesn't do anything but...
+            A mock of AssetCache that doesn't do anything but...
             '''
             _ = bucket, force_check, verbose, stacklevel  # For pylint.
             return s.replace('s3://baiji-pod-mock-versioned-assets', '/local')
 
         return VersionedCache(
-            static_cache=sc,
+            cache=cache,
             manifest_path=self.manifest_file,
             bucket='baiji-pod-mock-versioned-assets')
 
@@ -52,7 +52,7 @@ class TestVC(CreateScratchDirectoryMixin, unittest.TestCase):
         from baiji.pod import AssetCache
         from baiji.pod import VersionedCache
         return VersionedCache(
-            static_cache=AssetCache.create_default(),
+            cache=AssetCache.create_default(),
             manifest_path='versioned_assets.json',
             bucket='baiji-test-versioned-assets')
 
@@ -98,7 +98,7 @@ class TestVC(CreateScratchDirectoryMixin, unittest.TestCase):
         vc = self.real_vc()
 
         vc('/unittest/cache/versioned.txt')
-        vc.sc.invalidate(vc.uri('/unittest/cache/versioned.txt'))
+        vc.asset_cache.invalidate(vc.uri('/unittest/cache/versioned.txt'))
         # We use etag here because not only should we not re-download
         # versioned files, we shouldn't even have to check if they're still
         # valid.

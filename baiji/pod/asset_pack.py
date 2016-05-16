@@ -1,34 +1,5 @@
-class FileToPack(object):
-    '''
-    Helper class for dump().
-    '''
-    def __init__(self, src):
-        from baiji import s3
-        self.uri = src
 
-        parsed_src = s3.path.parse(src)
-        if parsed_src[1] in sc.config.immutable_buckets and \
-            vc.is_versioned(parsed_src[2]):
-            self.src = vc(parsed_src[2])
-        else:
-            self.src = sc(src)
-
-        self.dst = self.src.replace(sc.config.cache_dir, '')
-        if self.dst.startswith('/'):
-            self.dst = self.dst[1:]
-
-    def __repr__(self):
-        return '<sc pack {}>'.format(self.uri)
-
-    @property
-    def size(self):
-        try:
-            return self._size
-        except AttributeError:
-            self._size = os.stat(self.src).st_size # FIXME pylint: disable=attribute-defined-outside-init
-                return self._size
-
-def dump(static_cache, versioned_cache, paths, save_to, max_size=None):
+def dump(cache, versioned_cache, paths, save_to, max_size=None):
     '''
     Create an asset pack: a series of zip files containing the specified sc and
     vc assets.
@@ -42,8 +13,36 @@ def dump(static_cache, versioned_cache, paths, save_to, max_size=None):
     import os
     import zipfile
 
-    sc = static_cache
     vc = versioned_cache
+
+    class FileToPack(object):
+        def __init__(self, src):
+            from baiji import s3
+
+            self.cache = cache
+            self.uri = src
+
+            parsed_src = s3.path.parse(src)
+            if parsed_src[1] in cache.config.immutable_buckets and \
+                vc.is_versioned(parsed_src[2]):
+                self.src = vc(parsed_src[2])
+            else:
+                self.src = cache(src)
+
+            self.dst = self.src.replace(cache.config.cache_dir, '')
+            if self.dst.startswith('/'):
+                self.dst = self.dst[1:]
+
+        def __repr__(self):
+            return '<sc pack {}>'.format(self.uri)
+
+        @property
+        def size(self):
+            try:
+                return self._size
+            except AttributeError:
+                self._size = os.stat(self.src).st_size # FIXME pylint: disable=attribute-defined-outside-init
+            return self._size
 
     files_to_pack = sorted(
         [FileToPack(f) for f in paths],
@@ -82,7 +81,7 @@ def dump(static_cache, versioned_cache, paths, save_to, max_size=None):
             zip_path = os.path.splitext(save_to)[0] + '.zip'
 
         print 'Building {} with {} files, {} bytes'.format(
-            zip_path, len(files_in_zip), sum([x.size for x in files_in_zip])
+            zip_path, len(files_in_zip), sum([x.size for x in files_in_zip]))
 
         with zipfile.ZipFile(
             zip_path, 'w', zipfile.ZIP_DEFLATED, allowZip64=True) as zf:

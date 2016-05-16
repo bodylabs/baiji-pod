@@ -11,7 +11,7 @@ def main():
     cache = AssetCache.create_default()
 
     runner = AssetPackRunner(
-        static_cache=cache,
+        cache=cache,
         default_vc_manifest_path='versioned_assets.json',
         default_vc_bucket=None)
 
