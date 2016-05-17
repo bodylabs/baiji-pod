@@ -1,9 +1,9 @@
 import unittest
 import mock
-from bodylabs.util.test import CreateScratchDirectoryMixin
+from scratch_dir import ScratchDirMixin
 
 
-class TestVC(CreateScratchDirectoryMixin, unittest.TestCase):
+class TestVC(ScratchDirMixin, unittest.TestCase):
     def setUp(self):
         import os
         from baiji.pod.util import json

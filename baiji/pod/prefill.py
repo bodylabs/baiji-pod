@@ -26,7 +26,7 @@ class PrefillWorker(ParallelWorker):
 
 def prefill(static_cache, versioned_cache, paths, verbose=False):
     from baiji.util.parallel import parallel_for
-    from bodylabs.util.timer import Timer
+    from harrison import Timer
 
     with Timer(verbose=False) as t:
         parallel_for(

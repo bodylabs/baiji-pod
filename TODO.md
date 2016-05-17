@@ -9,8 +9,8 @@ TODO
 - Switch from bodylabs-test bucket
 - Use cached_property in asset_pack.FileToPack.size
 - Handle missing asset manifest in config, avoid using core_path
-- Use harrison for timer
-- Use scratch-dir
-- inspectlib.stack_frame_info
+- ~~Use harrison for timer~~
+- ~~Use scratch-dir~~
+- ~~inspectlib.stack_frame_info~~
 - util.internet reachability
 - Restore CDN publish functionality in core

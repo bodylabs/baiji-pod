@@ -170,7 +170,7 @@ class AssetCache(object):
         if verbose is None: # in most cases, we'll simply use the default for this cache object
             verbose = self.verbose
         def maybe_print(message):
-            from bodylabs.util.inspectlib import stack_frame_info
+            from harrison.util.inspectlib import stack_frame_info
             if verbose:
                 # stacklevel+2: one for `maybe_print`, one for `__call__`
                 where = stack_frame_info(stacklevel + 2).pretty
