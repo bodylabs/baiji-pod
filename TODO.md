@@ -7,7 +7,7 @@ TODO
 - test_asset_cache.py: Remove use of environs, remove BackupEnvMixin
 - Remove use of PRODUCTION env var
 - Switch from bodylabs-test bucket
-- Use cached_property in asset_pack.FileToPack.size
+- ~~Use cached_property in asset_pack.FileToPack.size~~
 - Handle missing asset manifest in config, avoid using core_path
 - ~~Use harrison for timer~~
 - ~~Use scratch-dir~~

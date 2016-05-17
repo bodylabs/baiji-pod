@@ -1,4 +1,3 @@
-
 def dump(cache, versioned_cache, paths, save_to, max_size=None):
     '''
     Create an asset pack: a series of zip files containing the specified sc and
@@ -12,6 +11,7 @@ def dump(cache, versioned_cache, paths, save_to, max_size=None):
     '''
     import os
     import zipfile
+    from cached_property import cached_property
 
     vc = versioned_cache
 
@@ -36,13 +36,9 @@ def dump(cache, versioned_cache, paths, save_to, max_size=None):
         def __repr__(self):
             return '<sc pack {}>'.format(self.uri)
 
-        @property
+        @cached_property
         def size(self):
-            try:
-                return self._size
-            except AttributeError:
-                self._size = os.stat(self.src).st_size # FIXME pylint: disable=attribute-defined-outside-init
-            return self._size
+            return os.stat(self.src).st_size
 
     files_to_pack = sorted(
         [FileToPack(f) for f in paths],
