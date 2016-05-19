@@ -122,3 +122,50 @@ class TestSC(BackupEnvMixin, TestSCBase):
             timestamp_file = os.path.join(
                 self.cache_dir, '.timestamps', self.bucket, filename)
             self.assertFalse(os.path.exists(timestamp_file))
+
+class TestCacheFile(TestSCBase):
+    def test_cachefile_parses_s3_path_correctly(self):
+        from baiji.pod.asset_cache import CacheFile
+        cf = CacheFile(self.cache, 's3://BuKeT/foo/bar.baz')
+        self.assertEqual(cf.path, '/foo/bar.baz')
+        self.assertEqual(cf.bucket, 'BuKeT')
+        self.assertEqual(cf.local, os.path.join(self.cache.config.cache_dir, 'BuKeT', 'foo/bar.baz'))
+        self.assertEqual(cf.remote, 's3://BuKeT/foo/bar.baz')
+        self.assertEqual(cf.timestamp_file, os.path.join(self.cache.config.cache_dir, '.timestamps', 'BuKeT', 'foo/bar.baz'))
+
+    def test_cachefile_parses_recursive_cached_calls_correctly(self):
+        from baiji.pod.asset_cache import CacheFile
+        with mock.patch('baiji.s3.cp') as mock_cp:
+            mock_cp.return_value = True
+            with mock.patch('baiji.s3.exists') as mock_exists:
+                mock_exists.return_value = True
+                local_path = self.cache('s3://BuKeT/foo/bar.baz')
+        self.assertEqual(local_path, os.path.join(self.cache.config.cache_dir, 'BuKeT', 'foo/bar.baz'))
+        cf = CacheFile(self.cache, local_path)
+        self.assertEqual(cf.path, '/foo/bar.baz')
+        self.assertEqual(cf.bucket, 'BuKeT')
+        self.assertEqual(cf.local, os.path.join(self.cache.config.cache_dir, 'BuKeT', 'foo/bar.baz'))
+        self.assertEqual(cf.remote, 's3://BuKeT/foo/bar.baz')
+        self.assertEqual(cf.timestamp_file, os.path.join(self.cache.config.cache_dir, '.timestamps', 'BuKeT', 'foo/bar.baz'))
+
+    def test_cachefile_parses_remote_path_with_no_bucket_correctly(self):
+        from baiji.pod.asset_cache import CacheFile
+        try:
+            self.cache.config.DEFAULT_BUCKET = 'BuKeT'
+            cf = CacheFile(self.cache, '/foo/bar.baz')
+            self.assertEqual(cf.path, '/foo/bar.baz')
+            self.assertEqual(cf.bucket, 'BuKeT')
+            self.assertEqual(cf.local, os.path.join(self.cache.config.cache_dir, 'BuKeT', 'foo/bar.baz'))
+            self.assertEqual(cf.remote, 's3://BuKeT/foo/bar.baz')
+            self.assertEqual(cf.timestamp_file, os.path.join(self.cache.config.cache_dir, '.timestamps', 'BuKeT', 'foo/bar.baz'))
+        finally:
+            self.cache.config.DEFAULT_BUCKET = 'BuKeT'
+
+    def test_cachefile_parses_remote_path_with_explicit_bucket_correctly(self):
+        from baiji.pod.asset_cache import CacheFile
+        cf = CacheFile(self.cache, '/foo/bar.baz', bucket='BuKeT')
+        self.assertEqual(cf.path, '/foo/bar.baz')
+        self.assertEqual(cf.bucket, 'BuKeT')
+        self.assertEqual(cf.local, os.path.join(self.cache.config.cache_dir, 'BuKeT', 'foo/bar.baz'))
+        self.assertEqual(cf.remote, 's3://BuKeT/foo/bar.baz')
+        self.assertEqual(cf.timestamp_file, os.path.join(self.cache.config.cache_dir, '.timestamps', 'BuKeT', 'foo/bar.baz'))
