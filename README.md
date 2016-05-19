@@ -63,9 +63,8 @@ config = Config()
 # Improve performance by assuming the bucket is immutable.
 config.IMMUTABLE_BUCKETS = ['my-versioned-assets']
 
-cache = AssetCache(config)
 vc = VersionedCache(
-    asset_cache=AssetCache.create_default(),
+    asset_cache=AssetCache(config),
     manifest_path='versioned_assets.json',
     bucket='my-versioned-assets')
 
