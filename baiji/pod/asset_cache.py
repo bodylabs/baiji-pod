@@ -105,9 +105,7 @@ class AssetCache(object):
     KeyNotFound = s3.KeyNotFound
 
     def __init__(self, config):
-        from env_flag import env_flag
         self.config = config
-        self.verbose = not env_flag('PRODUCTION')
 
     @classmethod
     def create_default(cls):
@@ -171,7 +169,7 @@ class AssetCache(object):
         from bodylabs.util.internet import assert_internet_reachable, InternetUnreachableError
 
         if verbose is None: # in most cases, we'll simply use the default for this cache object
-            verbose = self.verbose
+            verbose = self.config.verbose
         def maybe_print(message):
             from harrison.util.inspectlib import stack_frame_info
             if verbose:

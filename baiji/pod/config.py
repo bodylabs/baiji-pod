@@ -15,6 +15,7 @@ class Config(object):
     TIMEOUT = 86400  # == one day.
     IMMUTABLE_BUCKETS = []
     DEFAULT_BUCKET = None
+    VERBOSE = True
 
     @property
     def cache_dir(self):
@@ -58,3 +59,10 @@ class Config(object):
         bucket name. Deprecated.
         '''
         return os.getenv('STATIC_CACHE_DEFAULT_BUCKET', self.DEFAULT_BUCKET)
+
+    @property
+    def verbose(self):
+        '''
+        Whether the asset cache should print activity logs.
+        '''
+        return self.VERBOSE
