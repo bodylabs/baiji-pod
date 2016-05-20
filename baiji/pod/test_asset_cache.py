@@ -176,3 +176,22 @@ class TestCacheFile(TestSCBase):
         self.assertEqual(cf.local, os.path.join(self.cache.config.cache_dir, 'BuKeT', 'foo/bar.baz'))
         self.assertEqual(cf.remote, 's3://BuKeT/foo/bar.baz')
         self.assertEqual(cf.timestamp_file, os.path.join(self.cache.config.cache_dir, '.timestamps', 'BuKeT', 'foo/bar.baz'))
+
+    def test_that_age_of_nonexistent_file_is_forever(self):
+        import uuid
+        from baiji.pod.asset_cache import CacheFile
+        nonexistent_path = str(uuid.uuid4()) + '.txt'
+        cf = CacheFile(self.cache, nonexistent_path, bucket='BuKeT')
+        self.assertEqual(cf.age, float('inf'))
+
+    def test_that_file_operations_on_nonexistent_file_are_safe(self):
+        import uuid
+        from baiji.pod.asset_cache import CacheFile
+        nonexistent_path = str(uuid.uuid4()) + '.txt'
+        cf = CacheFile(self.cache, nonexistent_path, bucket='BuKeT')
+        self.assertIsNone(cf.timestamp)
+        self.assertIsNone(cf.size)
+        self.assertTrue(cf.is_outdated)
+        self.assertFalse(cf.is_cached)
+        cf.invalidate() # should not raise
+        cf.remove_cached() # should not raise

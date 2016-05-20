@@ -49,19 +49,33 @@ class CacheFile(object):
 
     @property
     def timestamp(self):
-        return os.path.getmtime(self.timestamp_file)
+        try:
+            return os.path.getmtime(self.timestamp_file)
+        except OSError as e:
+            import errno
+            if e.errno == errno.ENOENT:
+                return None
+            else:
+                raise
 
     @property
     def age(self):
         import time
-        if not os.path.exists(self.timestamp_file): # unknown
+        try:
+            return time.mktime(time.localtime()) - self.timestamp
+        except TypeError: # float - NoneType
             return float('inf')
-        return time.mktime(time.localtime()) - self.timestamp
 
     @property
     def size(self):
-        stat = os.stat(self.local)
-        return stat.st_size
+        try:
+            return os.stat(self.local).st_size
+        except OSError as e:
+            import errno
+            if e.errno == errno.ENOENT:
+                return None
+            else:
+                raise
 
     def update_timestamp(self):
         from baiji.util.shutillib import mkdir_p
@@ -70,12 +84,8 @@ class CacheFile(object):
         open(self.timestamp_file, 'w').close()
 
     def invalidate(self):
-        try:
-            os.remove(self.timestamp_file)
-        except OSError as e:
-            import errno
-            if e.errno != errno.ENOENT:
-                raise # we ignore a file not found error here
+        from baiji.pod.util.shutillib import remove_file
+        remove_file(self.timestamp_file)
 
     @property
     def is_outdated(self):
@@ -100,8 +110,9 @@ class CacheFile(object):
         return os.path.exists(self.local)
 
     def remove_cached(self):
+        from baiji.pod.util.shutillib import remove_file
         self.invalidate()
-        os.remove(self.local)
+        remove_file(self.local)
 
 
 class AssetCache(object):
