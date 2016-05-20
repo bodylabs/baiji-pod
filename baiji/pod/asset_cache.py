@@ -2,7 +2,7 @@ import os
 from baiji import s3
 
 
-class CachedPath(str):
+class CachedPath(unicode):
     pass
 
 
