@@ -118,7 +118,6 @@ class AssetCache(object):
         from baiji.exceptions import AWSCredentialsMissing
         from baiji.pod.util import yaml
         from bodylabs.util.internet import InternetUnreachableError
-        from bodylabs.util.paths import core_path
 
         msg = 'Tried to access {} from cache '.format(cache_file.remote)
         msg += 'but it was not in the cache '
@@ -134,11 +133,14 @@ class AssetCache(object):
         try:
             _ = credentials.key
         except AWSCredentialsMissing:
-            msg += " We've written this to a list of files you're missing in missing_assets.txt"
-            missing_asset_log = os.path.join(core_path(), 'missing_assets.yaml')
+            missing_asset_log_path = os.path.join(
+                self.config.cache_dir,
+                'missing_assets.yaml')
+            msg += " We've written this to a list of files you're missing in {}".format(
+                missing_asset_log_path)
             missing_assets = []
             try:
-                missing_assets = yaml.load(missing_asset_log)
+                missing_assets = yaml.load(missing_asset_log_path)
             except s3.KeyNotFound:
                 pass
             missing_assets.append(cache_file.remote)

@@ -86,7 +86,7 @@ class TestSC(BackupEnvMixin, TestSCBase):
             self.cache(self.filename)
             mock_cp.assert_called_with(
                 self.remote_file, self.local_file,
-                progress=False, force=True, validate=True)
+                progress=True, force=True, validate=True)
 
     def test_that_invalidating_nonexistent_file_succeeds(self):
         import uuid
