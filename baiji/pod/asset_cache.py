@@ -14,6 +14,8 @@ class CacheFile(object):
             parsed_path = s3.path.parse(path)
             self.path = parsed_path.path
             self.bucket = parsed_path.netloc
+            if bucket is not None:
+                raise ValueError('When providing an s3 path, do not use the bucket argument')
         else:
             if static_cache.is_cachefile(path):
                 self.path = static_cache.un_sc(path)
