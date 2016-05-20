@@ -116,12 +116,19 @@ class TestSC(BackupEnvMixin, TestSCBase):
             timestamp_file = os.path.join(
                 self.cache_dir, '.timestamps', self.bucket, filename)
             self.assertTrue(os.path.exists(timestamp_file))
+            cache_file = os.path.join(
+                self.cache_dir, self.bucket, filename)
+            self.assertTrue(os.path.exists(cache_file))
 
         self.cache.invalidate(path)
         for filename in filenames:
             timestamp_file = os.path.join(
                 self.cache_dir, '.timestamps', self.bucket, filename)
             self.assertFalse(os.path.exists(timestamp_file))
+            cache_file = os.path.join(
+                self.cache_dir, self.bucket, filename)
+            self.assertTrue(os.path.exists(cache_file))
+
 
 class TestCacheFile(TestSCBase):
     def test_cachefile_parses_s3_path_correctly(self):

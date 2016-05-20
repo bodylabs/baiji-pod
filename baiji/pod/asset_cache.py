@@ -70,8 +70,12 @@ class CacheFile(object):
         open(self.timestamp_file, 'w').close()
 
     def invalidate(self):
-        from baiji.pod.util.shutillib import remove_tree
-        remove_tree(self.timestamp_file)
+        try:
+            os.remove(self.timestamp_file)
+        except OSError as e:
+            import errno
+            if e.errno != errno.ENOENT:
+                raise # we ignore a file not found error here
 
     @property
     def is_outdated(self):
@@ -96,9 +100,8 @@ class CacheFile(object):
         return os.path.exists(self.local)
 
     def remove_cached(self):
-        from baiji.pod.util.shutillib import remove_tree
         self.invalidate()
-        remove_tree(self.local)
+        os.remove(self.local)
 
 
 class AssetCache(object):
@@ -205,13 +208,16 @@ class AssetCache(object):
         return cache_file.local
 
     def invalidate(self, path, bucket=None):
-        CacheFile(static_cache=self, path=path, bucket=bucket).invalidate()
+        cf = CacheFile(static_cache=self, path=path, bucket=bucket)
+        if os.path.isdir(cf.local): # we're dealing with a tree, not an actual CacheFile
+            from baiji.pod.util.shutillib import remove_tree
+            remove_tree(cf.timestamp_file)
+        else:
+            cf.invalidate()
 
     def invalidate_all(self):
-        import shutil
-        shutil.rmtree(
-            os.path.join(self.config.cache_dir, '.timestamps'),
-            ignore_errors=True)
+        from baiji.pod.util.shutillib import remove_tree
+        remove_tree(os.path.join(self.config.cache_dir, '.timestamps'))
 
     def delete(self, path, bucket=None):
         CacheFile(static_cache=self, path=path, bucket=bucket).remove_cached()
