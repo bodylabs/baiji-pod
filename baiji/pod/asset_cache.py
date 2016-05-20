@@ -164,7 +164,7 @@ class AssetCache(object):
 
         stacklevel: When `verbose` is `True`, how far up the stack to look when
             printing debug output. 1 means the immediate caller, 2 its caller,
-            and so on. Useful when calls to sc() are wrapped, such as in vc().
+            and so on. Useful when calls to cache() are wrapped, such as in vc().
         '''
         import socket
         from baiji.exceptions import AWSCredentialsMissing
