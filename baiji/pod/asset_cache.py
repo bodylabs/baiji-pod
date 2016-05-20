@@ -83,9 +83,10 @@ class CacheFile(object):
         return self.age > timeout
 
     def download(self, verbose=True):
-        if not s3.exists(self.remote):
+        try:
+            s3.cp(self.remote, self.local, force=True, progress=verbose, validate=True)
+        except s3.KeyNotFound:
             raise s3.KeyNotFound('{} not found on s3'.format(self.remote))
-        s3.cp(self.remote, self.local, force=True, progress=verbose, validate=True)
         self.update_timestamp()
 
     @property
