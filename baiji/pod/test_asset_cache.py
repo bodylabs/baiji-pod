@@ -102,6 +102,33 @@ class TestSC(BackupEnvMixin, TestSCBase):
         self.assertTrue(os.path.exists(self.local_file))
         self.assertFalse(os.path.exists(self.timestamp_file))
 
+    def test_that_invalidating_tree_removes_child_timestamps(self):
+        import uuid
+        path = 'test_sc/{}'.format(uuid.uuid4())
+        filenames = ['{}/test_sample_{}.txt'.format(path, i) for i in range(3)]
+        for filename in filenames:
+            remote_file = 's3://{}/{}'.format(self.bucket, filename)
+            s3.cp(self.temp_file, remote_file)
+            self.cache(filename)
+            s3.rm(remote_file)
+
+        for filename in filenames:
+            timestamp_file = os.path.join(
+                self.cache_dir, '.timestamps', self.bucket, filename)
+            self.assertTrue(os.path.exists(timestamp_file))
+            cache_file = os.path.join(
+                self.cache_dir, self.bucket, filename)
+            self.assertTrue(os.path.exists(cache_file))
+
+        self.cache.invalidate(path)
+        for filename in filenames:
+            timestamp_file = os.path.join(
+                self.cache_dir, '.timestamps', self.bucket, filename)
+            self.assertFalse(os.path.exists(timestamp_file))
+            cache_file = os.path.join(
+                self.cache_dir, self.bucket, filename)
+            self.assertTrue(os.path.exists(cache_file))
+
 
 class TestCacheFile(TestSCBase):
     def test_cachefile_parses_s3_path_correctly(self):
