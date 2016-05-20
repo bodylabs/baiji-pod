@@ -222,12 +222,11 @@ class AssetCache(object):
 
     def un_sc(self, path):
         '''un_sc(sc(foo)) == foo'''
-        import re
         if self.is_cachefile(path):
             # Nested calls to sc
             path = path.replace(self.config.cache_dir, '')
             # Remove leading bucket
-            path = re.match(r'[^/\\]*(/|\\)(.*)', path).groups()[1]
+            path = path.split(os.sep, 1)[1]
         return path
 
     def ls(self):
