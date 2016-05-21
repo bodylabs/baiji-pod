@@ -2,14 +2,16 @@ import unittest
 import os
 import mock
 from baiji import s3
-from bodylabs.util.test import BackupEnvMixin
 
-class TestSCBase(unittest.TestCase):
+
+class CreateDefaultAssetCacheMixin(object):
     def setUp(self):
         from baiji.pod import AssetCache
+        super(CreateDefaultAssetCacheMixin, self).setUp()
         self.cache = AssetCache.create_default()
 
-class TestSCExceptions(TestSCBase):
+
+class TestSCExceptions(CreateDefaultAssetCacheMixin, unittest.TestCase):
     def test_exceptions_interchangable_with_s3(self):
         from baiji.pod import AssetCache
         with self.assertRaises(s3.KeyNotFound):
@@ -17,7 +19,8 @@ class TestSCExceptions(TestSCBase):
         with self.assertRaises(AssetCache.KeyNotFound):
             self.cache('s3://bodylabs-test/there/is/nothing/here/without.a.doubt')
 
-class TestSC(BackupEnvMixin, TestSCBase):
+
+class TestSC(unittest.TestCase):
     @staticmethod
     def get_test_file_path():
         return os.path.abspath(os.path.join(
@@ -29,19 +32,21 @@ class TestSC(BackupEnvMixin, TestSCBase):
     def setUp(self):
         import tempfile
         import uuid
+        from baiji.pod import AssetCache
+        from baiji.pod.config import Config
         from baiji.util.testing import create_random_temporary_file
 
         super(TestSC, self).setUp()
 
-        self.cache.verbose = False
-
         self.cache_dir = tempfile.mkdtemp('BODYLABS_TEST_STATIC_CACHE_DIR')
         self.bucket = 'bodylabs-test'
 
-        self.backup_env('STATIC_CACHE_DIR', 'STATIC_CACHE_DEFAULT_BUCKET', 'STATIC_CACHE_TIMEOUT')
-        os.environ['STATIC_CACHE_DIR'] = self.cache_dir
-        os.environ['STATIC_CACHE_DEFAULT_BUCKET'] = self.bucket
-        os.environ['STATIC_CACHE_TIMEOUT'] = '1'
+        config = Config()
+        config.CACHE_DIR = self.cache_dir
+        config.DEFAULT_BUCKET = self.bucket
+        config.TIMEOUT = 1
+        config.VERBOSE = False
+        self.cache = AssetCache(config)
 
         self.filename = 'test_sc/{}/test_sample.txt'.format(uuid.uuid4())
         self.local_file = os.path.join(self.cache_dir, self.bucket, self.filename)
@@ -54,7 +59,6 @@ class TestSC(BackupEnvMixin, TestSCBase):
 
     def tearDown(self):
         import shutil
-        self.restore_env('STATIC_CACHE_DIR', 'STATIC_CACHE_DEFAULT_BUCKET', 'STATIC_CACHE_TIMEOUT')
         shutil.rmtree(self.cache_dir, ignore_errors=True)
         os.remove(self.temp_file)
         s3.rm(self.remote_file)
@@ -86,7 +90,7 @@ class TestSC(BackupEnvMixin, TestSCBase):
             self.cache(self.filename)
             mock_cp.assert_called_with(
                 self.remote_file, self.local_file,
-                progress=True, force=True, validate=True)
+                progress=False, force=True, validate=True)
 
     def test_that_invalidating_nonexistent_file_succeeds(self):
         import uuid
@@ -130,7 +134,7 @@ class TestSC(BackupEnvMixin, TestSCBase):
             self.assertTrue(os.path.exists(cache_file))
 
 
-class TestCacheFile(TestSCBase):
+class TestCacheFile(CreateDefaultAssetCacheMixin, unittest.TestCase):
     def test_cachefile_parses_s3_path_correctly(self):
         from baiji.pod.asset_cache import CacheFile
         cf = CacheFile(self.cache, 's3://BuKeT/foo/bar.baz')
@@ -157,16 +161,13 @@ class TestCacheFile(TestSCBase):
 
     def test_cachefile_parses_remote_path_with_no_bucket_correctly(self):
         from baiji.pod.asset_cache import CacheFile
-        try:
-            self.cache.config.DEFAULT_BUCKET = 'BuKeT'
-            cf = CacheFile(self.cache, '/foo/bar.baz')
-            self.assertEqual(cf.path, '/foo/bar.baz')
-            self.assertEqual(cf.bucket, 'BuKeT')
-            self.assertEqual(cf.local, os.path.join(self.cache.config.cache_dir, 'BuKeT', 'foo/bar.baz'))
-            self.assertEqual(cf.remote, 's3://BuKeT/foo/bar.baz')
-            self.assertEqual(cf.timestamp_file, os.path.join(self.cache.config.cache_dir, '.timestamps', 'BuKeT', 'foo/bar.baz'))
-        finally:
-            self.cache.config.DEFAULT_BUCKET = 'BuKeT'
+        self.cache.config.DEFAULT_BUCKET = 'BuKeT'
+        cf = CacheFile(self.cache, '/foo/bar.baz')
+        self.assertEqual(cf.path, '/foo/bar.baz')
+        self.assertEqual(cf.bucket, 'BuKeT')
+        self.assertEqual(cf.local, os.path.join(self.cache.config.cache_dir, 'BuKeT', 'foo/bar.baz'))
+        self.assertEqual(cf.remote, 's3://BuKeT/foo/bar.baz')
+        self.assertEqual(cf.timestamp_file, os.path.join(self.cache.config.cache_dir, '.timestamps', 'BuKeT', 'foo/bar.baz'))
 
     def test_cachefile_parses_remote_path_with_explicit_bucket_correctly(self):
         from baiji.pod.asset_cache import CacheFile
