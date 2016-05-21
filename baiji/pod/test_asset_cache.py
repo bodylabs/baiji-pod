@@ -20,13 +20,13 @@ class CreateTestAssetCacheMixin(object):
 
         super(CreateTestAssetCacheMixin, self).setUp()
 
-        self.cache_dir = tempfile.mkdtemp('BODYLABS_TEST_STATIC_CACHE_DIR')
+        self.cache_dir = tempfile.mkdtemp('BAIJI_POD_TEST_STATIC_CACHE')
         # Force the code to be robust to a missing cache directory. Catches a
         # failure when writing `missing_assets.yaml` without the directory
         # existing first.
         os.rmdir(self.cache_dir)
 
-        self.bucket = 'bodylabs-test'
+        self.bucket = 'baiji-pod-test'
 
         config = Config()
         config.CACHE_DIR = self.cache_dir
@@ -46,9 +46,9 @@ class TestAssetCacheExceptions(CreateDefaultAssetCacheMixin, unittest.TestCase):
         from baiji.pod import AssetCache
 
         with self.assertRaises(s3.KeyNotFound):
-            self.cache('s3://bodylabs-test/there/is/nothing/here/without.a.doubt')
+            self.cache('s3://baiji-pod-foo/there/is/nothing/here/without.a.doubt')
         with self.assertRaises(AssetCache.KeyNotFound):
-            self.cache('s3://bodylabs-test/there/is/nothing/here/without.a.doubt')
+            self.cache('s3://baiji-pod-foo/there/is/nothing/here/without.a.doubt')
 
 
 class TestMissingAssets(CreateTestAssetCacheMixin, unittest.TestCase):
@@ -62,7 +62,7 @@ class TestMissingAssets(CreateTestAssetCacheMixin, unittest.TestCase):
         # http://www.voidspace.org.uk/python/mock/examples.html#raising-exceptions-on-attribute-access
         type(mock_credentials).key = mock.PropertyMock(side_effect=AWSCredentialsMissing)
 
-        nonexistent_path = 's3://bodylabs-test/there/is/nothing/here/without.a.doubt'
+        nonexistent_path = 's3://baiji-pod-foo/there/is/nothing/here/without.a.doubt'
 
         with self.assertRaises(AWSCredentialsMissing):
             # Sanity check. ^^^
