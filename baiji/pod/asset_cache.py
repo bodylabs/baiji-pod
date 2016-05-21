@@ -250,16 +250,13 @@ class AssetCache(object):
         return path
 
     def ls(self):
-        files_in_cache = []
         for bucket in os.listdir(self.config.cache_dir):
             bucket_path = os.path.join(self.config.cache_dir, bucket)
             if os.path.isdir(bucket_path) and bucket != '.timestamps':
                 for root, _, files in os.walk(bucket_path):
                     for name in files:
                         if name not in ['.DS_Store']:
-                            cache_file = CacheFile(
+                            yield CacheFile(
                                 static_cache=self,
                                 path=os.path.join(root, name),
                                 bucket=bucket)
-                            files_in_cache.append(cache_file)
-        return files_in_cache
