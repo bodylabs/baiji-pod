@@ -17,3 +17,4 @@ TODO
 - Restore CDN publish functionality in core
 - Avoid using actual versioned assets. Perhaps write some (smaller!)
   files to a test bucket and use those?
+- Remove suffixes support in vc.uri, used only for CDNPublisher
