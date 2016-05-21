@@ -12,5 +12,6 @@ TODO
 - ~~Use harrison for timer~~
 - ~~Use scratch-dir~~
 - ~~inspectlib.stack_frame_info~~
-- util.internet reachability
+- Rework baiji.pod.util.reachability and perhaps baiji.util.reachability
+  as well.
 - Restore CDN publish functionality in core

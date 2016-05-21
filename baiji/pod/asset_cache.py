@@ -131,7 +131,7 @@ class AssetCache(object):
         from baiji.config import credentials
         from baiji.exceptions import AWSCredentialsMissing
         from baiji.pod.util import yaml
-        from bodylabs.util.internet import InternetUnreachableError
+        from baiji.pod.util.reachability import InternetUnreachableError
 
         msg = 'Tried to access {} from cache '.format(cache_file.remote)
         msg += 'but it was not in the cache '
@@ -182,7 +182,7 @@ class AssetCache(object):
         '''
         import socket
         from baiji.exceptions import AWSCredentialsMissing
-        from bodylabs.util.internet import assert_internet_reachable, InternetUnreachableError
+        from baiji.pod.util.reachability import assert_internet_reachable, InternetUnreachableError
 
         if verbose is None: # in most cases, we'll simply use the default for this cache object
             verbose = self.config.verbose
