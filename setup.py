@@ -33,8 +33,9 @@ setup(
         'baiji/pod/versioned',
     ],
     scripts=[
-        'bin/pod-prefill',
-        'bin/sc',
+        'bin/baiji-cache',
+        'bin/baiji-pack',
+        'bin/baiji-prefill',
         'bin/vc',
     ],
     install_requires=install_requires,
