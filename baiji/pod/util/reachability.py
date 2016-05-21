@@ -8,7 +8,7 @@ each request is appropriate for development, but not for production. Perhaps
 that also should be reworked a bit, or handled in configuration, etc.
 '''
 
-import env_flag
+from env_flag import env_flag
 
 def location_is_ec2():
     """
