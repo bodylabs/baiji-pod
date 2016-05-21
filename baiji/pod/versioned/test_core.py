@@ -1,6 +1,7 @@
 import unittest
 import mock
 from scratch_dir import ScratchDirMixin
+from baiji.pod.test_asset_cache import CreateTestAssetCacheMixin
 
 
 class TestVC(ScratchDirMixin, unittest.TestCase):
@@ -49,6 +50,7 @@ class TestVC(ScratchDirMixin, unittest.TestCase):
             bucket='baiji-pod-mock-versioned-assets')
 
     def real_vc(self):
+        import os
         from baiji.pod import Config
         from baiji.pod import AssetCache
         from baiji.pod import VersionedCache
@@ -56,6 +58,7 @@ class TestVC(ScratchDirMixin, unittest.TestCase):
         bucket = 'baiji-test-versioned-assets'
 
         config = Config()
+        config.CACHE_DIR = os.path.join(self.scratch_dir, 'test_vc_cache')
         config.IMMUTABLE_BUCKETS = [bucket]
 
         return VersionedCache(
@@ -105,7 +108,14 @@ class TestVC(ScratchDirMixin, unittest.TestCase):
     def test_sc_does_not_recheck(self):
         vc = self.real_vc()
 
-        with mock.patch('baiji.s3.cp'):
+        def touch_dst(src, dst, *args, **kwargs):
+            import os
+            from baiji.util.shutillib import mkdir_p
+            _ = src
+            mkdir_p(os.path.dirname(dst))
+            with open(dst, 'w'):
+                pass
+        with mock.patch('baiji.s3.cp', side_effect=touch_dst):
             vc('/foo/bar.csv')
 
         vc.cache.invalidate(vc.uri('/foo/bar.csv'))
