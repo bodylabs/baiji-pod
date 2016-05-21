@@ -31,16 +31,15 @@ those files are tracked and identified with to a semver-like version number.
 To use the versioned cache, you need a copy of a manifest file, which lists
 all the versioned paths and the latest version of each one. When you request a
 file from the cache, it consults this manifest file to determine the correct
-version. It delegates loading to the underlying asset cache.
+version. The versioned cache delegates loading to the underlying asset cache.
 
 The versioned cache was designed for compute assets: chunks of data which are
 used in code. When the manifest is checked in with the code, it pins the
-revision of the code to a particular version of each asset. If the asset is
-subsequently updated, the old revision of the code will continue to get the
-version it's expecting.
+version of each asset. If the asset is subsequently updated, that revision
+of the code will continue to get the version it's expecting.
 
-The bucket containing the versioned assets is intended as immutable; nothing
-there should ever be changed or deleted. Only new versions added.
+The bucket containing the versioned assets is intended to be immutable.
+Nothing there should ever be changed or deleted. Only new versions added.
 
 The manifest looks like this:
 
