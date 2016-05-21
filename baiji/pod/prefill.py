@@ -24,16 +24,19 @@ class PrefillWorker(ParallelWorker):
             print '{} is in the prefill manifest, but is not found!'.format(remote)
 
 
-def prefill(static_cache, versioned_cache, paths, verbose=False):
+def prefill(static_cache, versioned_cache, paths, num_processes=None, verbose=False):
     from baiji.util.parallel import parallel_for
     from harrison import Timer
+
+    if num_processes is None:
+        num_processes = static_cache.num_prefill_processes
 
     with Timer(verbose=False) as t:
         parallel_for(
             paths,
             PrefillWorker,
             args=[static_cache, versioned_cache, verbose],
-            num_processes=12)
+            num_processes=num_processes)
 
     print ''
     print 'sc prefill done in {} seconds'.format(t.elapsed_time_s)

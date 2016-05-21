@@ -16,6 +16,7 @@ class Config(object):
     IMMUTABLE_BUCKETS = []
     DEFAULT_BUCKET = None
     VERBOSE = True
+    NUM_PREFILL_PROCESSES = 12
 
     @property
     def cache_dir(self):
@@ -66,3 +67,10 @@ class Config(object):
         Whether the asset cache should print activity logs.
         '''
         return self.VERBOSE
+
+    @property
+    def num_prefill_processes(self):
+        '''
+        The number of parallel processes to use during prefill.
+        '''
+        return self.NUM_PREFILL_PROCESSES
