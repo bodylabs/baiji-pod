@@ -37,7 +37,8 @@ class VersionedCache(object):
             raise self.KeyNotFound('{} is not a versioned path'.format(path))
         uri = self.uri(path, version)
         try:
-            return self.cache(uri, verbose=verbose, stacklevel=2)
+            # TODO Put a test around this magic number.
+            return self.cache(uri, verbose=verbose, stacklevel=3)
         except s3.KeyNotFound:
             raise self.KeyNotFound('{} is not cached for version {}'.format(
                 path, version))
@@ -310,3 +311,12 @@ class VersionedCache(object):
                 patch=True, min_version=min_version, verbose=verbose)
         else:
             self.add(path, local_file, version=min_version, verbose=verbose)
+
+    def sync(self, destination):
+        for f in self.manifest_files:
+            target = s3.path.join(destination, f[1:])
+            print 'Copying {} version {} to {}'.format(
+                f,
+                self.manifest_version(f),
+                target)
+            s3.cp(self(f), target, force=True)

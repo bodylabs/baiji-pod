@@ -82,7 +82,8 @@ class VCRunner(object):
         subparsers['versions'].add_argument('path', type=str, help='path to list versions for')
 
         subparsers['sync'].add_argument(
-            'destination', type=str, help='path to sync the manifest to')
+            'destination', nargs='?', default='./versioned_assets', type=str,
+            help='path to sync the manifest to (default is ./versioned_assets)')
 
         subparsers['get'].add_argument('path', type=str, help='path to get')
         subparsers['get'].add_argument('version', type=str, nargs='?', help='version to get')
@@ -128,13 +129,7 @@ class VCRunner(object):
 
         if args.command == 'sync':
             print 'sync to {}'.format(args.destination)
-            for f in vc.manifest_files:
-                target = s3.path.join(args.destination, f[1:])
-                print 'copying {} version {} to {}'.format(
-                    f,
-                    vc.manifest_version(f),
-                    target)
-                s3.cp(vc(f), target, force=True)
+            vc.sync(args.destination)
 
         if args.command == 'ls':
             print '\n'.join(sorted(vc.manifest_files))
