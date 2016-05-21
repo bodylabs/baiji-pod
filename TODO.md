@@ -2,6 +2,9 @@ TODO
 ====
 
 - Add vc config to config
+    - Explain or clean up the weird default_bucket config logic in
+      prefill_runner. e.g. This logic is so that we can have a customized
+      script in core that doesn't require these arguments.
 - Use config without subclassing. Pass overries to init
 - Configure using an importable config path instead of injecting. Or, possibly,
   allow ~/.aws/baiji_config to change defaults.
