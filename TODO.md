@@ -15,3 +15,5 @@ TODO
 - Rework baiji.pod.util.reachability and perhaps baiji.util.reachability
   as well.
 - Restore CDN publish functionality in core
+- Avoid using actual versioned assets. Perhaps write some (smaller!)
+  files to a test bucket and use those?
