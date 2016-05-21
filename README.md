@@ -177,6 +177,7 @@ TODO
 - Move yaml.dump and json.* to baiji. Possibly do a
   `try: from baiji.serialization.json import load, dump; except ImportError: def load(...`
    Or at least have a comment to the effect of "don't use this, use baiji.serialization.json"
+- Use consistent argparse pattern in the runners.
 
 
 Contribute
