@@ -1,6 +1,6 @@
 class CacheUtilRunner(object):
-    def __init__(self, static_cache):
-        self.sc = static_cache
+    def __init__(self, asset_cache):
+        self.cache = asset_cache
 
     def _parse_args(self):
         import argparse
@@ -38,14 +38,14 @@ class CacheUtilRunner(object):
         args = self._parse_args()
 
         if args.command == 'cache':
-            self.sc(args.key, force_check=args.update)
+            self.cache(args.key, force_check=args.update)
 
         elif args.command == 'del':
-            self.sc.delete(args.key)
+            self.cache.delete(args.key)
 
         elif args.command == 'ls':
             if args.details:
-                for x in self.sc.ls():
+                for x in self.cache.ls():
                     outdated = 'outdated ' if x.is_outdated else ''
                     print '{is_remote} {file_size} {outdated}{age:.0f} days'.format(
                         is_remote=x.remote,
@@ -54,10 +54,10 @@ class CacheUtilRunner(object):
                         age=x.age/(60*60*24)
                     ).encode('utf-8')
             else:
-                print u'\n'.join([x.remote for x in self.sc.ls()]).encode('utf-8')
+                print u'\n'.join([x.remote for x in self.cache.ls()]).encode('utf-8')
 
         elif args.command == 'loc':
-            print self.sc.config.cache_dir
+            print self.cache.config.cache_dir
 
         # On success, exit with status code of 0.
         return 0
