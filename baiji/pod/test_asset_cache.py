@@ -11,7 +11,7 @@ class CreateDefaultAssetCacheMixin(object):
         self.cache = AssetCache.create_default()
 
 
-class TestSCExceptions(CreateDefaultAssetCacheMixin, unittest.TestCase):
+class TestAssetCacheExceptions(CreateDefaultAssetCacheMixin, unittest.TestCase):
     def test_exceptions_interchangable_with_s3(self):
         from baiji.pod import AssetCache
         with self.assertRaises(s3.KeyNotFound):
@@ -20,7 +20,7 @@ class TestSCExceptions(CreateDefaultAssetCacheMixin, unittest.TestCase):
             self.cache('s3://bodylabs-test/there/is/nothing/here/without.a.doubt')
 
 
-class TestSC(unittest.TestCase):
+class TestAssetCache(unittest.TestCase):
     @staticmethod
     def get_test_file_path():
         return os.path.abspath(os.path.join(
