@@ -11,3 +11,6 @@ TODO
 - Avoid using actual versioned assets. Perhaps write some (smaller!)
   files to a test bucket and use those?
 - Remove suffixes support in vc.uri, used only for CDNPublisher
+- Move yaml.dump and json.* to baiji. Possibly do a
+  `try: from baiji.serialization.json import load, dump; except ImportError: def load(...`
+   Or at least have a comment to the effect of "don't use this, use baiji.serialization.json"
