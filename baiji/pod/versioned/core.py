@@ -36,10 +36,11 @@ class VersionedCache(object):
         if not self.is_versioned(path):
             raise self.KeyNotFound('{} is not a versioned path'.format(path))
         uri = self.uri(path, version)
-        if not s3.exists(uri):
+        try:
+            return self.cache(uri, verbose=verbose, stacklevel=2)
+        except s3.KeyNotFound:
             raise self.KeyNotFound('{} is not cached for version {}'.format(
                 path, version))
-        return self.cache(uri, verbose=verbose, stacklevel=2)
 
     @cached_property
     def manifest(self):

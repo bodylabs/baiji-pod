@@ -64,15 +64,16 @@ class TestVC(ScratchDirMixin, unittest.TestCase):
         self.assertEqual(
             vc('/foo/semver.ftw'), '/local/foo/semver.0.1.6-foo.ftw')
 
-    @mock.patch('baiji.s3.exists')
-    def test_missing_version(self, exists_mock):
+    def test_missing_version(self):
+        from baiji import s3
+
         vc = self.mock_vc()
         vc('/foo/bar.csv', version='1.2.3')
 
-        exists_mock.return_value = False
-        error_msg = 'not cached for version 1.2.4'
-        with self.assertRaisesRegexp(vc.KeyNotFound, error_msg):
-            vc('/foo/bar.csv', version='1.2.4')
+        with mock.patch.object(vc, 'cache', side_effect=s3.KeyNotFound()):
+            error_msg = 'not cached for version 1.2.4'
+            with self.assertRaisesRegexp(vc.KeyNotFound, error_msg):
+                return vc('/foo/bar.csv', version='1.2.4')
 
     @mock.patch('baiji.s3.exists')
     def test_getting_versioned_items(self, exists_mock):
