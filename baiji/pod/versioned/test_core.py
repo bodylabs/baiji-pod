@@ -1,7 +1,6 @@
 import unittest
 import mock
 from scratch_dir import ScratchDirMixin
-from baiji.pod.test_asset_cache import CreateTestAssetCacheMixin
 
 
 class TestVC(ScratchDirMixin, unittest.TestCase):
@@ -111,7 +110,7 @@ class TestVC(ScratchDirMixin, unittest.TestCase):
         def touch_dst(src, dst, *args, **kwargs):
             import os
             from baiji.util.shutillib import mkdir_p
-            _ = src
+            _ = src, args, kwargs
             mkdir_p(os.path.dirname(dst))
             with open(dst, 'w'):
                 pass
