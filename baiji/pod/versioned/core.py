@@ -71,7 +71,7 @@ class VersionedCache(object):
         if hasattr(self, '_cache') and 'manifest' in self._cache:
             del self._cache['manifest']
 
-    def uri(self, path, version=None, allow_local=True, suffixes=None, bucket=None):
+    def uri(self, path, version=None, allow_local=True, suffixes=None):
         '''
         Default version is manifest version
         '''
@@ -79,13 +79,11 @@ class VersionedCache(object):
 
         if version is None:
             version = self.manifest_version(path)
-        if bucket is None:
-            bucket = self.bucket
 
         if self.version_number_is_valid(version):
             base_path, ext = os.path.splitext(path)
             suffixes = '.' + '.'.join(suffixes) if suffixes is not None and len(suffixes) > 0 else ''
-            return 's3://' + bucket + base_path + '.' + version + suffixes + ext
+            return 's3://' + self.bucket + base_path + '.' + version + suffixes + ext
         elif allow_local and s3.exists(version):
             # version here is a local or s3 path
             return version
