@@ -18,7 +18,7 @@ from setuptools import setup
 
 setup(
     name='baiji-pod',
-    version=importlib.import_module('baiji.pod').__version__,
+    version=importlib.import_module('baiji.pod.package_version').__version__,
     author='Body Labs',
     author_email='alex@bodylabs.com, paul.melnikow@bodylabs.com',
     description='Static caching of files from Amazon S3, using baiji',
