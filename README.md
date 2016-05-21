@@ -106,8 +106,9 @@ timeout, which defaults to one day, the validity of the local file is checked
 by comparing a local MD5 hash with the remote etag. This check is repeated
 once per day.
 
-To gain a performance boost, you can configure static buckets, whose contents
-are never revalidated after download.
+To gain a performance boost, you can configure immutable buckets, whose
+contents are never revalidated after download. The versioned cache uses this
+feature.
 
 ```
 import json
