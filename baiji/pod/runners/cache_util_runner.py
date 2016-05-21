@@ -47,8 +47,8 @@ class CacheUtilRunner(object):
             if args.details:
                 for x in self.cache.ls():
                     outdated = 'outdated ' if x.is_outdated else ''
-                    print '{is_remote} {file_size} {outdated}{age:.0f} days'.format(
-                        is_remote=x.remote,
+                    print '{remote_uri} {file_size} {outdated}{age:.0f} days'.format(
+                        remote_uri=x.remote,
                         file_size=format_bytes(x.size),
                         outdated=outdated,
                         age=x.age/(60*60*24)
