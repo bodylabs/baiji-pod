@@ -49,12 +49,19 @@ class TestVC(ScratchDirMixin, unittest.TestCase):
             bucket='baiji-pod-mock-versioned-assets')
 
     def real_vc(self):
+        from baiji.pod import Config
         from baiji.pod import AssetCache
         from baiji.pod import VersionedCache
+
+        bucket = 'baiji-test-versioned-assets'
+
+        config = Config()
+        config.IMMUTABLE_BUCKETS = [bucket]
+
         return VersionedCache(
-            cache=AssetCache.create_default(),
-            manifest_path='versioned_assets.json',
-            bucket='baiji-test-versioned-assets')
+            cache=AssetCache(config),
+            manifest_path=self.manifest_file,
+            bucket=bucket)
 
     @mock.patch('baiji.s3.exists')
     def test_semver_works(self, exists_mock):
@@ -98,14 +105,17 @@ class TestVC(ScratchDirMixin, unittest.TestCase):
     def test_sc_does_not_recheck(self):
         vc = self.real_vc()
 
-        vc('/unittest/cache/versioned.txt')
-        vc.asset_cache.invalidate(vc.uri('/unittest/cache/versioned.txt'))
+        with mock.patch('baiji.s3.cp'):
+            vc('/foo/bar.csv')
+
+        vc.cache.invalidate(vc.uri('/foo/bar.csv'))
+
         # We use etag here because not only should we not re-download
         # versioned files, we shouldn't even have to check if they're still
         # valid.
         with mock.patch('baiji.s3.etag') as mock_etag:
             mock_etag.return_value = True
-            vc('/unittest/cache/versioned.txt')
+            vc('/foo/bar.csv')
             self.assertFalse(mock_etag.called, 'sc tried to recheck a versioned file')
 
     def test_version_parsing(self):
