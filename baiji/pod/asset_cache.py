@@ -172,7 +172,10 @@ class AssetCache(object):
         - If it's less than `config.TIMEOUT` since it was last checked,
           return its path.
         - If the md5 of the local file matches the md5 of the remote file, mark
-          it as checked now and return it's path.
+          it as checked now and return it's path. For remote paths, the etag
+          contains the md5 of the contents, except for multipart uploads. In
+          baiji, files over 5gb are multipart uploaded, and use an algorithm
+          shared between baiji and s3 to get an etag hash based on md5.
         - Otherwise it's out of date and changed on s3: download, mark it as
           checked now, and return it's path.
 
