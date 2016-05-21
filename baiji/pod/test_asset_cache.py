@@ -45,9 +45,9 @@ class TestAssetCacheExceptions(CreateDefaultAssetCacheMixin, unittest.TestCase):
         from baiji.pod import AssetCache
 
         with self.assertRaises(s3.KeyNotFound):
-            self.cache('s3://baiji-pod-foo/there/is/nothing/here/without.a.doubt')
+            self.cache('s3://baiji-pod-test/there/is/nothing/here/without.a.doubt')
         with self.assertRaises(AssetCache.KeyNotFound):
-            self.cache('s3://baiji-pod-foo/there/is/nothing/here/without.a.doubt')
+            self.cache('s3://baiji-pod-test/there/is/nothing/here/without.a.doubt')
 
 
 class TestMissingAssets(CreateTestAssetCacheMixin, unittest.TestCase):
