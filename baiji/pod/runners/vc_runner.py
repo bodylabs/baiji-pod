@@ -161,7 +161,8 @@ class VCRunner(object):
             print vc.uri(args.path, version=args.version)
 
         if args.command == 'cat':
-            import shutil, sys
+            import shutil
+            import sys
             f = vc(args.path, version=args.version)
             shutil.copyfileobj(open(f, 'rb'), sys.stdout)
 

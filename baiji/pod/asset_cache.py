@@ -159,7 +159,7 @@ class AssetCache(object):
                 pass
             missing_assets.append(cache_file.remote)
             missing_assets = sorted(list(set(missing_assets)))
-            yaml.dump(missing_assets, missing_asset_log)
+            yaml.dump(missing_assets, missing_asset_log_path)
 
         raise reason(msg)
 
