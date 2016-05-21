@@ -152,13 +152,19 @@ class AssetCache(object):
                 'missing_assets.yaml')
             msg += " We've written this to a list of files you're missing in {}".format(
                 missing_asset_log_path)
-            missing_assets = []
             try:
                 missing_assets = yaml.load(missing_asset_log_path)
-            except s3.KeyNotFound:
-                pass
+            except IOError as e:
+                import errno
+                if e.errno == errno.ENOENT:
+                    missing_assets = []
+                else:
+                    raise
             missing_assets.append(cache_file.remote)
             missing_assets = sorted(list(set(missing_assets)))
+            # This yaml.dump doesn't create intermediate directories, but
+            # because s3.cp creates interposing directories, we know the cache
+            # dir already exists at this point.
             yaml.dump(missing_assets, missing_asset_log_path)
 
         raise reason(msg)

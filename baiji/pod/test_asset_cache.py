@@ -11,16 +11,69 @@ class CreateDefaultAssetCacheMixin(object):
         self.cache = AssetCache.create_default()
 
 
+class CreateTestAssetCacheMixin(object):
+    def setUp(self):
+        import os
+        import tempfile
+        from baiji.pod import AssetCache
+        from baiji.pod.config import Config
+
+        super(CreateTestAssetCacheMixin, self).setUp()
+
+        self.cache_dir = tempfile.mkdtemp('BODYLABS_TEST_STATIC_CACHE_DIR')
+        # Force the code to be robust to a missing cache directory. Catches a
+        # failure when writing `missing_assets.yaml` without the directory
+        # existing first.
+        os.rmdir(self.cache_dir)
+
+        self.bucket = 'bodylabs-test'
+
+        config = Config()
+        config.CACHE_DIR = self.cache_dir
+        config.DEFAULT_BUCKET = self.bucket
+        config.TIMEOUT = 1
+        config.VERBOSE = False
+        self.cache = AssetCache(config)
+
+    def tearDown(self):
+        import shutil
+        super(CreateTestAssetCacheMixin, self).tearDown()
+        shutil.rmtree(self.cache_dir, ignore_errors=True)
+
+
 class TestAssetCacheExceptions(CreateDefaultAssetCacheMixin, unittest.TestCase):
     def test_exceptions_interchangable_with_s3(self):
         from baiji.pod import AssetCache
+
         with self.assertRaises(s3.KeyNotFound):
             self.cache('s3://bodylabs-test/there/is/nothing/here/without.a.doubt')
         with self.assertRaises(AssetCache.KeyNotFound):
             self.cache('s3://bodylabs-test/there/is/nothing/here/without.a.doubt')
 
 
-class TestAssetCache(unittest.TestCase):
+class TestMissingAssets(CreateTestAssetCacheMixin, unittest.TestCase):
+    @mock.patch('baiji.config.credentials', new_callable=mock.PropertyMock)
+    def test_missing_assets(self, mock_credentials):
+        import os
+        from baiji.exceptions import AWSCredentialsMissing
+        from baiji.pod.util import yaml
+
+        # See
+        # http://www.voidspace.org.uk/python/mock/examples.html#raising-exceptions-on-attribute-access
+        type(mock_credentials).key = mock.PropertyMock(side_effect=AWSCredentialsMissing)
+
+        nonexistent_path = 's3://bodylabs-test/there/is/nothing/here/without.a.doubt'
+
+        with self.assertRaises(AWSCredentialsMissing):
+            # Sanity check. ^^^
+            self.cache(nonexistent_path)
+
+        missing_assets_path = os.path.join(self.cache_dir, 'missing_assets.yaml')
+        missing_assets = yaml.load(missing_assets_path)
+
+        self.assertEqual(missing_assets, [nonexistent_path])
+
+class TestAssetCache(CreateTestAssetCacheMixin, unittest.TestCase):
     @staticmethod
     def get_test_file_path():
         return os.path.abspath(os.path.join(
@@ -30,23 +83,10 @@ class TestAssetCache(unittest.TestCase):
             'README.md'))
 
     def setUp(self):
-        import tempfile
         import uuid
-        from baiji.pod import AssetCache
-        from baiji.pod.config import Config
         from baiji.util.testing import create_random_temporary_file
 
-        super(TestSC, self).setUp()
-
-        self.cache_dir = tempfile.mkdtemp('BODYLABS_TEST_STATIC_CACHE_DIR')
-        self.bucket = 'bodylabs-test'
-
-        config = Config()
-        config.CACHE_DIR = self.cache_dir
-        config.DEFAULT_BUCKET = self.bucket
-        config.TIMEOUT = 1
-        config.VERBOSE = False
-        self.cache = AssetCache(config)
+        super(TestAssetCache, self).setUp()
 
         self.filename = 'test_sc/{}/test_sample.txt'.format(uuid.uuid4())
         self.local_file = os.path.join(self.cache_dir, self.bucket, self.filename)
@@ -58,8 +98,7 @@ class TestAssetCache(unittest.TestCase):
         s3.cp(self.temp_file, self.remote_file)
 
     def tearDown(self):
-        import shutil
-        shutil.rmtree(self.cache_dir, ignore_errors=True)
+        super(TestAssetCache, self).setUp()
         os.remove(self.temp_file)
         s3.rm(self.remote_file)
 
