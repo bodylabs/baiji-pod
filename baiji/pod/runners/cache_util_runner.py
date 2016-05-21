@@ -8,27 +8,27 @@ class CacheUtilRunner(object):
         parser = argparse.ArgumentParser(
             description='baiji-pod asset cache utility',
             epilog='keys are a kind of URL, of the form s3://BUCKET/PATH/TO/FILE')
-        parser.subs = parser.add_subparsers(help='sub-command help', dest='command')
-        subparsers = {}
+        commands = parser.add_subparsers(help='sub-command help', dest='command')
 
-        subparsers['cache'] = parser.subs.add_parser('cache', help='cache a file')
-        subparsers['del'] = parser.subs.add_parser(
-            'del', help='remove a file from the cache')
-        subparsers['ls'] = parser.subs.add_parser(
-            'ls', help='list everything in the cache')
-        subparsers['loc'] = parser.subs.add_parser(
-            'loc', help='print the location of the cache')
-
-        subparsers['cache'].add_argument(
+        cache_command = commands.add_parser(
+            'cache', help='cache a file')
+        cache_command.add_argument(
             'key', type=str, help='key to cache: s3://BUCKET/PATH/TO/FILE')
-        subparsers['cache'].add_argument(
+        cache_command.add_argument(
             '-u', '--update', action='store_true', help='always check for updates')
 
-        subparsers['del'].add_argument(
+        del_command = parser.subs.add_parser(
+            'del', help='remove a file from the cache')
+        del_command.add_argument(
             'key', type=str, help='key to delete: s3://BUCKET/PATH/TO/FILE')
 
-        subparsers['ls'].add_argument(
+        ls_command = parser.subs.add_parser(
+            'ls', help='list everything in the cache')
+        ls_command.add_argument(
             '-l', '--details', action='store_true', help='more detail')
+
+        parser.subs.add_parser(
+            'loc', help='print the location of the cache')
 
         return parser.parse_args()
 
