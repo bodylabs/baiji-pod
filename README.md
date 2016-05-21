@@ -9,12 +9,12 @@ Static caching of files from Amazon S3, using [baiji][].
 Features
 --------
 
-- Versioned cache supports version-tracked assets
+- Versioned cache for version-tracked assets
     - Creates a new file each time it changes
     - Using a checked-in manifest, each revision of the code is pinned to a
       given version of the file
     - Convenient CLI for pushing updates
-- Low-level asset cache supports caching any S3 path
+- Low-level asset cache, for any S3 path
     - Assets are stored locally, and revalidated after a timeout
 - Prefill tool populates the caches with a list of needed assets
 - Supports Python 2.7
