@@ -1,7 +1,8 @@
 baiji-pod
 =========
 
-Static caching of files from Amazon S3, using [baiji][].
+Versioned-tracked assets and a low-level asset cache for files on Amazon S3,
+using [baiji][].
 
 [baiji]: http://github.com/bodylabs/baiji
 
