@@ -64,7 +64,7 @@ class PrefillRunner(object):
             print 'Nothing to prefill!'
         else:
             prefill(
-                static_cache=self.cache,
+                asset_cache=self.cache,
                 versioned_cache=vc,
                 paths=paths,
                 verbose=args.verbose)
