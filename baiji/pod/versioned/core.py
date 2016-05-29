@@ -146,7 +146,7 @@ class VersionedCache(object):
         # parsed is a list of key, version tuples.
         return sorted(set([key for key, _ in parsed]))
 
-    def versions_avaliable(self, path):
+    def versions_available(self, path):
         import semantic_version
 
         path = self.normalize_path(path)
@@ -158,7 +158,7 @@ class VersionedCache(object):
         return versions
 
     def latest_available_version(self, path):
-        versions = self.versions_avaliable(path)
+        versions = self.versions_available(path)
         if len(versions) > 0:
             return str(versions[-1])
         else:

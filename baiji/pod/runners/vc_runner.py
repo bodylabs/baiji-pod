@@ -46,7 +46,7 @@ class VCRunner(object):
         subparsers['update'] = parser.subs.add_parser(
             'update', help='update a versioned file')
         subparsers['versions'] = parser.subs.add_parser(
-            'versions', help='list versions avaliable for a versioned file')
+            'versions', help='list versions available for a versioned file')
         subparsers['sync'] = parser.subs.add_parser(
             'sync', help='sync a manifest to a local directory')
         subparsers['ls'] = parser.subs.add_parser(
@@ -124,7 +124,7 @@ class VCRunner(object):
                 verbose=True)
 
         if args.command == 'versions':
-            for v in vc.versions_avaliable(args.path):
+            for v in vc.versions_available(args.path):
                 print v
 
         if args.command == 'sync':
