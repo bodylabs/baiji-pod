@@ -69,8 +69,10 @@ class VersionedCache(object):
         manifest[path] = version
         json.dump(manifest, self.manifest_path, sort_keys=True, indent=4)
 
-        if hasattr(self, '_cache') and 'manifest' in self._cache:
-            del self._cache['manifest']
+        try:
+            del self.__dict__['manifest']
+        except KeyError:
+            pass
 
     def uri(self, path, version=None, allow_local=True, suffixes=None):
         '''
