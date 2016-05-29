@@ -1,0 +1,23 @@
+#!/usr/bin/env python
+#
+# If you wish to inject your own configuration, set a default bucket, or
+# override the default manifest path, make a copy of this file.
+
+def main():
+    import sys
+    from baiji.pod import AssetCache
+    from baiji.pod.runners.vc_runner import VCRunner
+
+    sc = AssetCache.create_default()
+
+    runner = VCRunner(
+        cache=sc,
+        default_manifest_path='versioned_assets.json',
+        default_bucket=None)
+
+    return_status = runner.main()
+
+    sys.exit(return_status)
+
+if __name__ == '__main__':
+    main()
