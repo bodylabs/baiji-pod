@@ -179,6 +179,10 @@ TODO
   `try: from baiji.serialization.json import load, dump; except ImportError: def load(...`
    Or at least have a comment to the effect of "don't use this, use baiji.serialization.json"
 - Use consistent argparse pattern in the runners.
+- I think it would be better if the CacheFile didn't need to know about the
+  AssetCache, to avoid this bi-directional dependency. It's only required in
+  the constructor, but that could live on the AssetCache, e.g.
+  create_cache_file(path, bucket=None).
 
 
 Contribute
