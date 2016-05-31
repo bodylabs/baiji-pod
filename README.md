@@ -64,7 +64,7 @@ config = Config()
 config.IMMUTABLE_BUCKETS = ['my-versioned-assets']
 
 vc = VersionedCache(
-    asset_cache=AssetCache(config),
+    cache=AssetCache(config),
     manifest_path='versioned_assets.json',
     bucket='my-versioned-assets')
 
