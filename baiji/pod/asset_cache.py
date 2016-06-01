@@ -3,7 +3,8 @@ from baiji import s3
 
 
 class CachedPath(unicode):
-    pass
+    def __reduce__(self):
+        return unicode, (unicode(self),)
 
 
 class CacheFile(object):

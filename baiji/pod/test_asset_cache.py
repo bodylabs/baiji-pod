@@ -1,6 +1,7 @@
 import unittest
 import os
 import mock
+from scratch_dir import ScratchDirMixin
 from baiji import s3
 
 
@@ -233,3 +234,27 @@ class TestCacheFile(CreateDefaultAssetCacheMixin, unittest.TestCase):
         self.assertFalse(cf.is_cached)
         cf.invalidate() # should not raise
         cf.remove_cached() # should not raise
+
+class TestCachePath(ScratchDirMixin, unittest.TestCase):
+    def test_that_unpickle_returns_string(self):
+        '''
+        Cover an issue where instances of `CachedPath` were being pickled,
+        creating a dependency between the baiji-pod implementation and the
+        pickled assets.
+        '''
+        import pickle
+        from baiji.pod.asset_cache import CachedPath
+
+        cache_path = CachedPath('/foo/bar')
+        self.assertIsInstance(cache_path, CachedPath)
+
+        path = self.get_tmp_path('cached_path.pkl')
+        with open(path, 'w') as f:
+            pickle.dump(cache_path, f)
+
+        with mock.patch('baiji.pod.asset_cache.CachedPath') as m:
+            with open(path, 'r') as f:
+                loaded_cache_path = pickle.load(f)
+            m.assert_not_called()
+
+        self.assertIsNot(type(loaded_cache_path), CachedPath)
