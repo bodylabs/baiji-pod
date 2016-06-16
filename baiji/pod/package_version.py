@@ -5,4 +5,4 @@
 # Observed when installing in CI, where cached_property is not installed
 # at the outset.
 
-__version__ = '1.0.3'
+__version__ = '1.0.4'
