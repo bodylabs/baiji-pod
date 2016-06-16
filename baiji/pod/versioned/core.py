@@ -67,13 +67,7 @@ class VersionedCache(object):
 
         manifest = json.load(self.manifest_path)
         manifest[path] = version
-        json.dump(
-            manifest,
-            self.manifest_path,
-            sort_keys=True,
-            indent=4,
-            # Avoid extra empty space at EOL.
-            separators=(',', ': '))
+        json.dump(manifest, self.manifest_path, sort_keys=True, indent=4)
 
         try:
             del self.__dict__['manifest']
