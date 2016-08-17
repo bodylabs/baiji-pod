@@ -103,7 +103,7 @@ class CacheFile(object):
         try:
             s3.cp(self.remote, self.local, force=True, progress=verbose, validate=True)
         except s3.KeyNotFound as e:
-            raise s3.KeyNotFound('{0} not found on s3. Reason: {1}'.format(self.remote, str(e)))
+            raise e
         self.update_timestamp()
 
     @property
