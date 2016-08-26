@@ -102,8 +102,8 @@ class CacheFile(object):
     def download(self, verbose=True):
         try:
             s3.cp(self.remote, self.local, force=True, progress=verbose, validate=True)
-        except s3.KeyNotFound:
-            raise s3.KeyNotFound('{} not found on s3'.format(self.remote))
+        except s3.KeyNotFound as e:
+            raise e
         self.update_timestamp()
 
     @property
