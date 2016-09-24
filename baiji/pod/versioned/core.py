@@ -282,12 +282,17 @@ class VersionedCache(object):
     def add_or_update(self, path, local_file,
                       version=None, major=False, minor=False, patch=False,
                       min_version=None, verbose=False):
+        import semantic_version
         if self.is_versioned(path):
             self.update(
                 path, local_file,
                 version=version, major=major, minor=minor, patch=patch,
                 min_version=min_version, verbose=verbose)
         else:
+            if version is None:
+                version = min_version
+            elif min_version is not None and semantic_version.Version(version) < semantic_version.Version(min_version):
+                version = min_version
             self.add(path, local_file, version=version, verbose=verbose)
 
     def add_or_update_major(self, path, local_file, min_version=None, verbose=False):
