@@ -129,7 +129,7 @@ class AssetCache(object):
         return cls(config)
 
     def _raise_cannot_get_needed_file(self, cache_file, reason):
-        from baiji.config import credentials
+        from baiji.config import settings
         from baiji.exceptions import AWSCredentialsMissing
         from baiji.pod.util import yaml
         from baiji.pod.util.reachability import InternetUnreachableError
@@ -146,7 +146,7 @@ class AssetCache(object):
             msg += 'but something went wrong.'
 
         try:
-            _ = credentials.key
+            _ = settings.key
         except AWSCredentialsMissing:
             missing_asset_log_path = os.path.join(
                 self.config.cache_dir,

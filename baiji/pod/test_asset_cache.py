@@ -52,7 +52,7 @@ class TestAssetCacheExceptions(CreateDefaultAssetCacheMixin, unittest.TestCase):
 
 
 class TestMissingAssets(CreateTestAssetCacheMixin, unittest.TestCase):
-    @mock.patch('baiji.config.credentials', new_callable=mock.PropertyMock)
+    @mock.patch('baiji.config.settings', new_callable=mock.PropertyMock)
     def test_missing_assets(self, mock_credentials):
         from baiji.exceptions import AWSCredentialsMissing
         from baiji.pod.util import yaml
