@@ -1,3 +1,4 @@
+# pylint: disable=len-as-condition
 import os
 from baiji import s3
 from cached_property import cached_property

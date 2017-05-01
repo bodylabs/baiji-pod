@@ -83,7 +83,7 @@ class TestAssetCache(CreateTestAssetCacheMixin, unittest.TestCase):
 
     def setUp(self):
         import uuid
-        from baiji.util.testing import create_random_temporary_file
+        from bltest.random_data import create_random_temporary_file
 
         super(TestAssetCache, self).setUp()
 
