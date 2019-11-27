@@ -1,6 +1,8 @@
 baiji-pod
 =========
 
+This project is on hiatus. Please see https://github.com/metabolize/baiji-pod for more active development.
+
 Versioned-tracked assets and a low-level asset cache for Amazon S3, using
 [baiji][].
 
